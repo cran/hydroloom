@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="dblodgett@usgs.gov" />
+
+
+<title>Hydroloom Overview</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Hydroloom Overview</h1>
+<h4 class="author"><a href="mailto:dblodgett@usgs.gov" class="email">dblodgett@usgs.gov</a></h4>
+
+
+
+<style type="text/css">
+.main-container {max-width: 100%;}
+.row {display: flex;}
+.column {flex: 50%;}
+</style>
+<div id="hydroloom" class="section level1">
+<h1>hydroloom</h1>
+<p>Hydroloom is designed to provide general hydrologic network
+functionality for any hydrographic or hydrologic data. This is
+accomplished with<br />
+1) the <code>hy</code> S3 class,<br />
+2) a collection of utility functions,<br />
+3) functions to work with a hydrologic network topology as a
+graph,<br />
+4) functions to create and add useful network attributes,<br />
+5) and functions to index data to a network of flow network lines and
+waterbody polygons.</p>
+<p>This introduction covers the <code>hy</code> S3 class and the core
+flow network topology concepts necessary to use hydroloom
+effectively.</p>
+<p>For the latest development and to open issues, please visit the <a href="https://github.com/DOI-USGS/hydroloom">package github
+repository.</a></p>
+</div>
+<div id="hy-s3-class" class="section level1">
+<h1><code>hy</code> S3 class</h1>
+<p>Hydroloom implements an <code>hy</code> S3 class designed to simplify
+integration of <code>hydroloom</code> with existing data and workflows.
+<code>hy()</code> converts a data.frame to an <code>hy</code>
+<code>data.frame</code> with attributes compatible with
+<code>hydroloom</code> functions. <code>hy_reverse()</code> converts a
+<code>hy</code> <code>data.frame</code> back to its original attribute
+names. You can teach <code>hydroloom</code> how to map your attributes
+to <code>hydroloom_name_definitions()</code> with the
+<code>hydroloom_names()</code> function.8</p>
+<p>Most <code>hydroloom</code> functions will work with either a
+<code>hy</code> object or a <code>data.frame</code> containing names
+registered with <code>hydroloom_names()</code>. Any attributes added to
+the <code>data.frame</code> will contain names from
+<code>hydroloom</code> and must be renamed in the calling
+environment.</p>
+<p>Internally, the <code>hy</code> S3 class has an attribute
+<code>orig_names</code> as shown below. The <code>orig_names</code>
+attribute is used to convert original attribute names back to their
+original values. Using the <code>hydroloom</code> names and the
+<code>hy</code> S3 object are note required but adopting
+<code>hydroloom_names_definitions()</code> may be helpful for people
+aiming for consistent, simple, and accurate attribute names.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(hydroloom)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>hy_net <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/new_hope.gpkg&quot;</span>, <span class="at">package =</span> <span class="st">&quot;hydroloom&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(COMID, REACHCODE, FromNode, ToNode, Hydroseq, TerminalFl, Divergence)</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">hy</span>(hy_net[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,])</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 3 features and 7 fields</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; Dimension:     XY</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; Bounding box:  xmin: 1517192 ymin: 1555954 xmax: 1518702 ymax: 1557298</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; CRS:           unknown</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;        id aggregate_id    fromnode    tonode topo_sort terminal_flag divergence</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt;     &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;int&gt;      &lt;int&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 1 8893864 03030002000018 250031721 250031853 250016373             0          0</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 2 8894490 03030002000018 250031895 250031854 250015665             0          0</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 3 8894494 03030002000018 250031897 250031895 250015826             0          0</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: geom &lt;MULTILINESTRING [m]&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="fu">attr</span>(<span class="fu">hy</span>(hy_net), <span class="st">&quot;orig_names&quot;</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt;           COMID       REACHCODE        FromNode          ToNode        Hydroseq </span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt;            &quot;id&quot;  &quot;aggregate_id&quot;      &quot;fromnode&quot;        &quot;tonode&quot;     &quot;topo_sort&quot; </span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;      TerminalFl      Divergence            geom </span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; &quot;terminal_flag&quot;    &quot;divergence&quot;          &quot;geom&quot;</span></span></code></pre></div>
+</div>
+<div id="network-representation" class="section level1">
+<h1>Network Representation</h1>
+<div id="representing-dendritic-network-topology" class="section level2">
+<h2>Representing Dendritic Network Topology</h2>
+<p>A network of flowlines can be represented as an edge-to-edge
+(e.g. edge list) or edge-node topology. An edge list only expresses the
+connectivity between <em>edges</em> (flowlines in the context of
+rivers), requiring <em>nodes</em> (confluences in the context of rivers)
+to be inferred.</p>
+<pre><code>#&gt;  id toid fromnode tonode
+#&gt;   1    3       N1     N3
+#&gt;   2    3       N2     N3
+#&gt;   3   NA       N3     N4</code></pre>
+<div class="figure" style="text-align: center">
+<img src="data:image/png;base64,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" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." width="45%" /><img src="data:image/png;base64,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" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." width="45%" />
+<p class="caption">
+In an edge-node topology, edges are directed to nodes which are then
+directed to other edges. An edge-to-edge toplogy does not include
+intervening nodes.
+</p>
+</div>
+<p>The “toid” of a terminal flowline can be either NA or, by convention,
+0 or ““. Using 0 or an empty string is preferred within
+<code>hydroloom</code> but both are handled in most cases. Further, as
+long as 0 is not in the set of IDs, there is little practical
+difference.</p>
+<p>In <code>hydroloom</code>, edge-to-edge topology is referred to with
+“id and toid” attributes.</p>
+</div>
+<div id="representing-dendritic-network-topology-1" class="section level2">
+<h2>Representing Dendritic Network Topology</h2>
+<p>As discussed in the <code>vignette(&quot;hydroloom&quot;)</code> vignette, a
+hydrologic flow network can be represented as an edge to edge (e.g. edge
+list) topology or an edge-node topology. In the case of dendritic
+networks, an edge list can be stored as a single “toid” attribute on
+each feature and nodes are redundant as there would be one and only one
+node for each feature. In non-dendritic networks, an edge list can
+include multiple “toid” attributes for each feature, necessitating a one
+to many relationship that can be difficult to interpret. Nevertheless,
+the U.S. National Hydrography Dataset uses an edge-list format in its
+“flow table” and the format is capable of storing non-dendritic feature
+topology.</p>
+<p>Using a node topology to store a flow network, each feature flows
+from one and only one node and flows to one and only one node. This one
+to one relationship between features and their from and to nodes means
+that the topology fits in a table with one row per feature as is common
+practice in spatial feature data.</p>
+<p>For this reason, the NHDPlus data model converts the NHD “flow table”
+into node topology in its representation of non dendritic topology. The
+downside of this approach is that it requires creation of a node
+identifier. These node identifiers are a table deduplication device that
+enables a one to many relationship (the flow table) to be represented as
+two one to one relationships. Given this, in hydrologic flow networks,
+node identifiers can be created based on an edge list and discarded when
+no longer needed.</p>
+<div class="row">
+<div class="column">
+<p><img src="data:image/png;base64,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" width="45%" style="display: block; margin: auto;" /></p>
+</div>
+<div class="column">
+<p><img src="data:image/png;base64,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" width="45%" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<p>In this example of an edge list topology and a node topology for the
+same system, feature ‘1’ flows to two edges but only one node. We can
+represent this in tabular form with a duplicated row for the divergence
+downstream of ‘1’ or with the addition of node identifiers as shown in
+the following tables.</p>
+<div class="row">
+<div class="column">
+<table>
+<thead>
+<tr class="header">
+<th>id</th>
+<th>fromnode</th>
+<th>tonode</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>N1</td>
+<td>N2</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>N2</td>
+<td>N3</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>N3</td>
+<td>N4</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>N2</td>
+<td>N4</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>N4</td>
+<td>N5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="column">
+<table>
+<thead>
+<tr class="header">
+<th>id</th>
+<th>toid</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>4</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="network-graph-representation" class="section level2">
+<h2>Network Graph Representation</h2>
+<p>The <code>make_index_ids()</code> <code>hydroloom</code> function
+creates an adjacency matrix representation of a flow network as well as
+some convenient content that are useful when traversing the graph. This
+adjacency matrix is used heavily in <code>hydroloom</code> functions and
+may be useful to people who want to write their own graph traversal
+algorithms.</p>
+<p>A companion to <code>make_index_ids()</code>,
+<code>make_fromids()</code> reverses the graph such that the adjacency
+matrix is directed opposite the direction of the provided graph. This is
+used for upstream flow network traversals.</p>
+<p>In the example below we’ll add a dendritic toid and explore the
+<code>make_index_ids()</code> output.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(hy_net, <span class="at">return_dendritic =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [1]   1 746</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">lengths</span>(ind_id<span class="sc">$</span>lengths))</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<p>Now we’ll look at the same thing but for a non dendritic set of
+toids. Notice that the <code>to</code> element of <code>ind_id</code>
+now has three rows. This indicates that one or more of the connections
+in the matrix has three downstream neighbors. The <code>lengths</code>
+element indicates how many non <code>NA</code> values are in each column
+of the matrix in the <code>to</code> element.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(<span class="fu">st_drop_geometry</span>(hy_net), <span class="at">return_dendritic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">max</span>(ind_id<span class="sc">$</span>lengths)</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">3</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
