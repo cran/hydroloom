@@ -1,6 +1,8 @@
 ## ----setup, include = FALSE---------------------------------------------------
 local <- (Sys.getenv("BUILD_VIGNETTES") == "TRUE")
 
+if(!require(nhdplusTools)) local <- FALSE
+
 if(!local) {
   nhdplusTools::nhdplusTools_data_dir(tempdir())
 }
@@ -18,7 +20,7 @@ knitr::opts_chunk$set(
 )
 
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 library(hydroloom)
 library(dplyr)
 
@@ -27,12 +29,12 @@ dir <- nhdplusTools::download_nhd(nhdplusTools::nhdplusTools_data_dir(),
 fs <- list.files(dir, pattern = ".*1908.*.gdb", full.names = TRUE)
 
 # Dropping Z and M and making sure everything is LINESTRING helps later.
-fl <- sf::st_zm(sf::st_cast(sf::read_sf(fs, "NHDFlowline"), "LINESTRING"))
+fl <- sf::st_cast(sf::st_zm(sf::read_sf(fs, "NHDFlowline"), "LINESTRING"))
 
 # remove any coastal (ftype 566) features
 fl <- filter(fl, ftype != 566)
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 # this is a seed point near the outlet of a watershed to consider.
 point <- sf::st_sfc(sf::st_point(c(-147.911472, 64.796633)), 
                               crs = 4269)
@@ -45,7 +47,7 @@ sub <- fl[fl$permanent_identifier == i$permanent_identifier, ]
 
 mapview::mapview(list(sub, point))
 
-## ---- message=FALSE-----------------------------------------------------------
+## ----message=FALSE------------------------------------------------------------
 # remove coastal and make terminals go to an empty id.
 flow_table <- sf::read_sf(fs, "NHDFlow") |>
   filter(from_permanent_identifier %in% fl$permanent_identifier) |>

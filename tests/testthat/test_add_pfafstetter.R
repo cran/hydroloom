@@ -1,6 +1,6 @@
 test_that("get_pfaf", {
 
-  skip("need nhdplusTools up to date")
+  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
 
   work_dir <- nhdplusTools::nhdplusTools_data_dir()
 

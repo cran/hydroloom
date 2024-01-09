@@ -40,7 +40,7 @@ plot(sf::st_geometry(x), col = NA)
 plot(x["lpid"], add = TRUE, lwd = 2)
 par(oldpar)
 
-## ---- echo=TRUE, eval=TRUE----------------------------------------------------
+## ----echo=TRUE, eval=TRUE-----------------------------------------------------
 # Import data
 x <- hy(sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom")))
 
@@ -57,7 +57,7 @@ head(fpath <- select(sf::st_cast(fpath, "LINESTRING"),
 ## -----------------------------------------------------------------------------
 head(fpath <- sort_network(fpath, split = TRUE))
 
-## ---- echo = TRUE, fig.dim=c(3, 3)--------------------------------------------
+## ----echo = TRUE, fig.dim=c(3, 3)---------------------------------------------
 fpath['topo_sort'] <- seq(nrow(fpath), 1)
 plot(fpath['topo_sort'], key.pos = NULL)
 

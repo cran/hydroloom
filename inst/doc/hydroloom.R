@@ -26,7 +26,7 @@ hy(hy_net[1:3,])
 attr(hy(hy_net), "orig_names")
 
 
-## ---- echo=FALSE, eval=TRUE, fig.dim=c(6, 4)----------------------------------
+## ----echo=FALSE, eval=TRUE, fig.dim=c(6, 4)-----------------------------------
 print.data.frame(data.frame(id = c(1, 2, 3), 
                             toid = c(3, 3, NA),
                             fromnode = c("N1", "N2", "N3"),
