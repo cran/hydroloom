@@ -1,6 +1,6 @@
 Package: hydroloom
 Title: Utilities to Weave Hydrologic Fabrics
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
     person(given = "David", 
            family = "Blodgett", 
@@ -22,8 +22,8 @@ VignetteBuilder: knitr
 Language: en-US
 URL: https://github.com/DOI-USGS/hydroloom
 NeedsCompilation: no
-Packaged: 2024-01-09 01:22:54 UTC; dblodgett
+Packaged: 2024-01-15 15:29:30 UTC; dblodgett
 Author: David Blodgett [aut, cre] (<https://orcid.org/0000-0001-9489-1710>)
 Maintainer: David Blodgett <dblodgett@usgs.gov>
 Repository: CRAN
-Date/Publication: 2024-01-09 10:50:06 UTC
+Date/Publication: 2024-01-15 16:20:02 UTC
