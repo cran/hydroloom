@@ -95,7 +95,7 @@ lp <-  unique(lp$levelpath)
 terminal_fpath <- dplyr::filter(fpath, id %in% terminal_id)
 
 gif_file <- "levelpath.gif"
-
+try({
 gifski::save_gif({
   for(i in 1:length(lp)) {
     lp_plot <- dplyr::filter(fpath, levelpath == lp[i])
@@ -111,6 +111,7 @@ gifski::save_gif({
 }, gif_file, delay = 0.5)
 
 knitr::include_graphics(gif_file)
+})
 
 ## ----teardown, include=FALSE--------------------------------------------------
 options(oldoption)

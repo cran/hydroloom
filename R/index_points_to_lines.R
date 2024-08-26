@@ -63,7 +63,7 @@ match_crs <- function(x, y, warn_text = "") {
   x
 }
 
-make_singlepart <- function(x, warn_text = "") {
+make_singlepart <- function(x, warn_text = "", stop_on_real_multi = FALSE) {
   check <- nrow(x)
 
   gt <- st_geometry_type(x, by_geometry = FALSE)
@@ -75,6 +75,7 @@ make_singlepart <- function(x, warn_text = "") {
   }
 
   if (nrow(x) != check) {
+    if(stop_on_real_multi) stop("Multipart geometries not supported.")
     warning(warn_text)
   }
 
@@ -221,7 +222,16 @@ index_points_to_lines.hy <- function(x, points,
 
   search_radius <- check_search_radius(search_radius, points)
 
-  point_buffer <- st_buffer(points, search_radius)
+  if(!is.na(precision)) {
+    if(requireNamespace("geos", quietly = TRUE)) {
+      point_buffer <- geos::geos_buffer(geos::as_geos_geometry(sf::st_geometry(points)),
+                                        distance = search_radius)
+
+      point_buffer <- sf::st_as_sfc(point_buffer)
+    } else {
+      point_buffer <- st_buffer(points, search_radius)
+    }
+  }
 
   if(units(search_radius) == units(as_units("degrees"))) {
     if(st_is_longlat(in_crs) & search_radius > set_units(1, "degree")) {
@@ -382,6 +392,8 @@ index_points_to_lines.hy <- function(x, points,
 #' @export
 #' @examples
 #'
+#' if(require(nhdplusTools)) {
+#'
 #' source(system.file("extdata/sample_data.R", package = "nhdplusTools"))
 #'
 #' waterbodies <- sf::st_transform(
@@ -393,6 +405,8 @@ index_points_to_lines.hy <- function(x, points,
 #'
 #' index_points_to_waterbodies(waterbodies, points,
 #'                     search_radius = units::set_units(500, "m"))
+#'
+#' }
 #'
 index_points_to_waterbodies <- function(waterbodies, points, flines = NULL,
                                         search_radius = NULL) {
@@ -419,7 +433,9 @@ index_points_to_waterbodies <- function(waterbodies, points, flines = NULL,
 
   wb_atts <- mutate(st_drop_geometry(waterbodies), index = seq_len(nrow(waterbodies)))
 
-  waterbodies <- make_singlepart(waterbodies, "Converting to singlepart.")
+  waterbodies <- make_singlepart(waterbodies, stop_on_real_multi = TRUE)
+
+  if(nrow(waterbodies) != nrow(wb_atts)) stop("Multipart waterbody polygons not supported.")
 
   waterbodies <- st_coordinates(waterbodies)
 

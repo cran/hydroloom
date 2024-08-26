@@ -50,7 +50,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,7 +61,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -460,12 +460,12 @@ recreate the non-dendritic network.</p>
 <span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a><span class="fu">all</span>(flow_net<span class="sc">$</span>divergence <span class="sc">==</span> x<span class="sc">$</span>Divergence)</span>
 <span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
 <span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a><span class="fu">sum</span>(flow_net<span class="sc">$</span>return_divergence <span class="sc">==</span> x<span class="sc">$</span>RtnDiv)</span>
-<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a><span class="co">#&gt; [1] 662</span></span>
+<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a><span class="co">#&gt; [1] 745</span></span>
 <span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a></span>
 <span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a><span class="fu">names</span>(flow_net)</span>
-<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;COMID&quot;             &quot;toid&quot;              &quot;fromnode&quot;         </span></span>
-<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="co">#&gt;  [4] &quot;tonode&quot;            &quot;GNIS_ID&quot;           &quot;FTYPE&quot;            </span></span>
-<span id="cb1-50"><a href="#cb1-50" tabindex="-1"></a><span class="co">#&gt;  [7] &quot;divergence&quot;        &quot;stream_order&quot;      &quot;stream_calculator&quot;</span></span>
+<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;COMID&quot;             &quot;toid&quot;              &quot;tonode&quot;           </span></span>
+<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="co">#&gt;  [4] &quot;GNIS_ID&quot;           &quot;FTYPE&quot;             &quot;divergence&quot;       </span></span>
+<span id="cb1-50"><a href="#cb1-50" tabindex="-1"></a><span class="co">#&gt;  [7] &quot;fromnode&quot;          &quot;stream_order&quot;      &quot;stream_calculator&quot;</span></span>
 <span id="cb1-51"><a href="#cb1-51" tabindex="-1"></a><span class="co">#&gt; [10] &quot;return_divergence&quot;</span></span></code></pre></div>
 <p>With the above code, we removed all attributes other than an ID, a
 name and a feature type and recreated both a dendritic (toid) and

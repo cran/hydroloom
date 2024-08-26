@@ -128,7 +128,7 @@ add_divergence.hy <- function(x, coastal_outlet_ids, inland_outlet_ids,
     try(navigate_network_dfs(x = net, starts = i,
                              direction = "up",
                              reset = FALSE))
-  }, net = x, cl = "future")
+  }, net = x, cl = future_available())
 
   paths_df <- data.frame(id = unlist(term),
                          paths = I(unlist(paths,
@@ -425,7 +425,7 @@ add_return_divergence.hy <- function(x, status = TRUE) {
     # need to pass main as the first start
     starts <- c(main, divs)
 
-    paths <- navigate_network_dfs_internal(g, starts, reset = FALSE)
+    paths <- navigate_network_dfs_internal(g, starts, reset = FALSE, main = FALSE)
 
     out <- unlist(lapply(paths[2:length(paths)], function(x) {
       lapply(x, function(x2) tail(unlist(x2, recursive = TRUE, use.names = FALSE), 1))

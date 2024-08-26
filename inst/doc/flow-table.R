@@ -1,9 +1,10 @@
 ## ----setup, include = FALSE---------------------------------------------------
 local <- (Sys.getenv("BUILD_VIGNETTES") == "TRUE")
 
-if(!require(nhdplusTools)) local <- FALSE
+if(!requireNamespace("nhdplusTools", quietly = TRUE)) local <- FALSE
+if(!requireNamespace("mapview", quietly = TRUE)) local <- FALSE
 
-if(!local) {
+if(local) {
   nhdplusTools::nhdplusTools_data_dir(tempdir())
 }
 

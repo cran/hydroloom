@@ -1,5 +1,5 @@
 test_that("index to waterbodies", {
-  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
+  if(!requireNamespace("nhdplusTools", quietly = TRUE)) skip("Missing nhdplusTools")
 
   source(system.file("extdata/sample_data.R", package = "nhdplusTools"))
 
@@ -44,11 +44,15 @@ test_that("index to waterbodies", {
   # point near waterbody
   expect_equal(match[7,]$outlet_fline_COMID, 13294312)
 
+  sf::st_geometry(wb_l)[[1]] <- sf::st_multipolygon(list(sf::st_geometry(wb_l)[[1]][[1]], sf::st_geometry(wb_l)[[1]][[1]]))
+
+  expect_error(match <- index_points_to_waterbodies(wb_l, gage_l, search_radius = units::set_units(50, "m")),
+               "Multipart geometries not supported.")
 })
 
 sr <- units::set_units(0.1, "degrees")
 
-if(require(nhdplusTools)) {
+if(requireNamespace("nhdplusTools", quietly = TRUE)) {
   source(system.file("extdata", "sample_flines.R", package = "nhdplusTools"))
 
   sample_flines <- sf::st_cast(sample_flines, "LINESTRING", warn = FALSE)
@@ -56,7 +60,8 @@ if(require(nhdplusTools)) {
 
 test_that("point indexing to nearest existing node works as expected", {
 
-  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
+  if(!requireNamespace("nhdplusTools", quietly = TRUE)) skip("Missing nhdplusTools")
+  if(!requireNamespace("lwgeom", quietly = TRUE)) skip("Missing lwgeom")
 
   flines_in <- sample_flines
 
@@ -109,7 +114,7 @@ test_that("point indexing to nearest existing node works as expected", {
 
 test_that("point indexing works without measures", {
 
-  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
+  if(!requireNamespace("nhdplusTools", quietly = TRUE)) skip("Missing nhdplusTools")
 
     flines_in <- sample_flines
 
@@ -129,8 +134,8 @@ test_that("point indexing works without measures", {
 
 test_that("point indexing to for multiple points works", {
 
-  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
-
+  if(!requireNamespace("nhdplusTools", quietly = TRUE)) skip("Missing nhdplusTools")
+  if(!requireNamespace("lwgeom", quietly = TRUE)) skip("Missing lwgeom")
   flines_in <- sample_flines
 
   flines_in <- sf::st_transform(flines_in, 4269)
@@ -223,7 +228,7 @@ test_that("no duplicates when using precision", {
 
 test_that("disambiguate", {
 
-  if(!require(nhdplusTools)) skip("Missing nhdplusTools")
+  if(!requireNamespace("nhdplusTools", quietly = TRUE)) skip("Missing nhdplusTools")
 
   source(system.file("extdata", "sample_flines.R", package = "nhdplusTools"))
 
