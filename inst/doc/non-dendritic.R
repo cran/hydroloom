@@ -8,19 +8,17 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE,
   comment = "#>",
-  fig.width=6,
-  fig.height=6,
+  fig.width = 6,
+  fig.height = 6,
   fig.align = "center",
-  eval=local
+  eval = local
 )
 
 oldoption <- options(scipen = 9999)
 
-
 ## -----------------------------------------------------------------------------
-
-x <- sf::read_sf(system.file("extdata/new_hope.gpkg", 
-                             package = "hydroloom"))
+x <- sf::read_sf(system.file("extdata/new_hope.gpkg",
+  package = "hydroloom"))
 
 # First we select only an id, a name, and a feature type.
 flow_net <- x |>
@@ -38,17 +36,17 @@ flow_net <- flow_net |>
 # or inland but we have to provide it.
 outlets <- filter(flow_net, !tonode %in% fromnode)
 
-# We have these feature types. A larger dataset might include 
+# We have these feature types. A larger dataset might include
 # things like canals which would not be considered  "major"
 unique(flow_net$FTYPE)
 
 # now we run the add_divergence, add_toids, and add_streamorder
-flow_net <- add_divergence(flow_net, 
-                           coastal_outlet_ids = c(), 
-                           inland_outlet_ids = outlets$COMID, 
-                           name_attr = "GNIS_ID", 
-                           type_attr = "FTYPE", 
-                           major_types = unique(flow_net$FTYPE)) |>
+flow_net <- add_divergence(flow_net,
+  coastal_outlet_ids = c(),
+  inland_outlet_ids = outlets$COMID,
+  name_attr = "GNIS_ID",
+  type_attr = "FTYPE",
+  major_types = unique(flow_net$FTYPE)) |>
   add_toids() |>
   add_streamorder() |>
   add_return_divergence()
@@ -60,5 +58,4 @@ all(flow_net$divergence == x$Divergence)
 sum(flow_net$return_divergence == x$RtnDiv)
 
 names(flow_net)
-
 

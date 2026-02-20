@@ -1,6 +1,6 @@
 Package: hydroloom
 Title: Utilities to Weave Hydrologic Fabrics
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: 
     person(given = "David", 
            family = "Blodgett", 
@@ -12,10 +12,10 @@ Depends: R (>= 4.1.0)
 Imports: dplyr, data.table, sf, units, stats, methods, utils, pbapply,
         tidyr, RANN, rlang, fastmap
 Suggests: testthat, nhdplusTools, future, lwgeom, future.apply, knitr,
-        gifski, mapview, geos
+        gifski, mapview, webshot, geos
 License: CC0
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Config/testthat/parallel: true
 Config/testthat/edition: 3
 VignetteBuilder: knitr
@@ -23,9 +23,9 @@ Language: en-US
 URL: https://github.com/DOI-USGS/hydroloom,
         https://doi-usgs.github.io/hydroloom/
 NeedsCompilation: no
-Packaged: 2025-10-01 16:41:33 UTC; dblodgett
+Packaged: 2026-02-19 20:26:04 UTC; dblodgett
 Author: David Blodgett [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-9489-1710>)
 Maintainer: David Blodgett <dblodgett@usgs.gov>
 Repository: CRAN
-Date/Publication: 2025-10-01 17:10:02 UTC
+Date/Publication: 2026-02-20 06:40:02 UTC

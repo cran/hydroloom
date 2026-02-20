@@ -8,14 +8,13 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   warning = FALSE,
   comment = "#>",
-  fig.width=6, 
-  fig.height=6, 
-  fig.align="center",
-  eval=local
+  fig.width = 6,
+  fig.height = 6,
+  fig.align = "center",
+  eval = local
 )
 
 oldoption <- options(scipen = 9999)
-
 
 ## ----sort, echo=FALSE, eval=TRUE, fig.cap="Smaller 'topo_sort' values are guaranteed to be downstream of larger values along connected paths.", fig.dim=c(3, 3)----
 x <- hy(sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom")))
@@ -47,31 +46,31 @@ x <- hy(sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom"))
 # Strip the data back to the required base attributes
 fpath <- hydroloom::add_toids(
   dplyr::select(x, id, fromnode, tonode, divergence, feature_type,
-                da_sqkm, length_km, GNIS_ID)
+    da_sqkm, length_km, GNIS_ID)
 )
 
 # Print
-head(fpath <- select(sf::st_cast(fpath, "LINESTRING"), 
-                     -tonode, -fromnode, -divergence, -feature_type))
+head(fpath <- select(sf::st_cast(fpath, "LINESTRING"),
+  -tonode, -fromnode, -divergence, -feature_type))
 
 ## -----------------------------------------------------------------------------
 head(fpath <- sort_network(fpath, split = TRUE))
 
 ## ----echo = TRUE, fig.dim=c(3, 3)---------------------------------------------
-fpath['topo_sort'] <- seq(nrow(fpath), 1)
-plot(fpath['topo_sort'], key.pos = NULL)
+fpath["topo_sort"] <- seq(nrow(fpath), 1)
+plot(fpath["topo_sort"], key.pos = NULL)
 
 ## -----------------------------------------------------------------------------
 # Rename and compute weight
 fpath$arbolatesum <- accumulate_downstream(
-  dplyr::select(fpath, 
-                id, toid, length_km), "length_km")
+  dplyr::select(fpath,
+    id, toid, length_km), "length_km")
 
 plot(sf::st_geometry(fpath), lwd = fpath$arbolatesum / 10)
 
 ## ----levelpath, fig.show="hold", out.width="45%"------------------------------
 # Get levelpaths
-fpath <- add_levelpaths(fpath, name_attribute = "GNIS_ID",weight_attribute = "arbolatesum", 
+fpath <- add_levelpaths(fpath, name_attribute = "GNIS_ID", weight_attribute = "arbolatesum",
   status = FALSE, override_factor = 5)
 
 # Print
@@ -82,41 +81,37 @@ plot(fpath["levelpath"], key.pos = NULL)
 
 ## -----------------------------------------------------------------------------
 # Invert plotting order
-fpath <- dplyr::arrange(fpath, topo_sort) 
+fpath <- dplyr::arrange(fpath, topo_sort)
 
 # Level Paths with more then 2 flowlines
-lp <- dplyr::group_by(fpath, levelpath) %>%
-dplyr::filter(n() > 2) 
+lp <- dplyr::group_by(fpath, levelpath) |>
+  dplyr::filter(n() > 2)
 
 # Unique Level Path ID
-lp <-  unique(lp$levelpath)
+lp <- unique(lp$levelpath)
 
-# Terminal flowline 
+# Terminal flowline
 terminal_fpath <- dplyr::filter(fpath, id %in% terminal_id)
 
 gif_file <- "levelpath.gif"
 try({
-gifski::save_gif({
-  for(i in 1:length(lp)) {
-    lp_plot <- dplyr::filter(fpath, levelpath == lp[i])
+  gifski::save_gif({
+    for (i in seq_along(lp)) {
+      lp_plot <- dplyr::filter(fpath, levelpath == lp[i])
 
-    outlet_plot <- dplyr::filter(lp_plot, id %in% terminal_id)
+      outlet_plot <- dplyr::filter(lp_plot, id %in% terminal_id)
 
-    plot(sf::st_geometry(fpath), lwd = 0.5, col = "grey")
-    plot(sf::st_geometry(terminal_fpath), lwd = 3, col = "red", add = TRUE)
-    plot(sf::st_geometry(dplyr::filter(fpath, levelpath %in% lp[1:i])), add = TRUE)
-    plot(sf::st_geometry(lp_plot), col = "blue", add = TRUE)
-    plot(sf::st_geometry(outlet_plot), col = "red", lwd = 1.5, add = TRUE)
-  }
-}, gif_file, delay = 0.5)
+      plot(sf::st_geometry(fpath), lwd = 0.5, col = "grey")
+      plot(sf::st_geometry(terminal_fpath), lwd = 3, col = "red", add = TRUE)
+      plot(sf::st_geometry(dplyr::filter(fpath, levelpath %in% lp[1:i])), add = TRUE)
+      plot(sf::st_geometry(lp_plot), col = "blue", add = TRUE)
+      plot(sf::st_geometry(outlet_plot), col = "red", lwd = 1.5, add = TRUE)
+    }
+  }, gif_file, delay = 0.5)
 
-knitr::include_graphics(gif_file)
+  knitr::include_graphics(gif_file)
 })
 
 ## ----teardown, include=FALSE--------------------------------------------------
 options(oldoption)
-
-if(Sys.getenv("BUILD_VIGNETTES") != "TRUE") {
-  unlink(work_dir, recursive = TRUE)
-}
 

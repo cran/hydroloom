@@ -352,14 +352,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1>hydroloom</h1>
 <p>Hydroloom is designed to provide general hydrologic network
 functionality for any hydrographic or hydrologic data. This is
-accomplished with<br />
-1) the <code>hy</code> S3 class,<br />
-2) a collection of utility functions,<br />
-3) functions to work with a hydrologic network topology as a
-graph,<br />
-4) functions to create and add useful network attributes,<br />
-5) and functions to index data to a network of flow network lines and
-waterbody polygons.</p>
+accomplished with 1) the <code>hy</code> S3 class, 2) a collection of
+utility functions, 3) functions to work with a hydrologic network
+topology as a graph, 4) functions to create and add useful network
+attributes, 5) and functions to index data to a network of flow network
+lines and waterbody polygons.</p>
 <p>This introduction covers the <code>hy</code> S3 class and the core
 flow network topology concepts necessary to use hydroloom
 effectively.</p>
@@ -376,7 +373,7 @@ integration of <code>hydroloom</code> with existing data and workflows.
 <code>hy</code> <code>data.frame</code> back to its original attribute
 names. You can teach <code>hydroloom</code> how to map your attributes
 to <code>hydroloom_name_definitions()</code> with the
-<code>hydroloom_names()</code> function.8</p>
+<code>hydroloom_names()</code> function.</p>
 <p>Most <code>hydroloom</code> functions will work with either a
 <code>hy</code> object or a <code>data.frame</code> containing names
 registered with <code>hydroloom_names()</code>. Any attributes added to
@@ -387,7 +384,7 @@ environment.</p>
 <code>orig_names</code> as shown below. The <code>orig_names</code>
 attribute is used to convert original attribute names back to their
 original values. Using the <code>hydroloom</code> names and the
-<code>hy</code> S3 object are note required but adopting
+<code>hy</code> S3 object are not required but adopting
 <code>hydroloom_names_definitions()</code> may be helpful for people
 aiming for consistent, simple, and accurate attribute names.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(hydroloom)</span>
@@ -395,7 +392,7 @@ aiming for consistent, simple, and accurate attribute names.</p>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>hy_net <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/new_hope.gpkg&quot;</span>, <span class="at">package =</span> <span class="st">&quot;hydroloom&quot;</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(COMID, REACHCODE, FromNode, ToNode, Hydroseq, TerminalFl, Divergence)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">hy</span>(hy_net[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,])</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">hy</span>(hy_net[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, ])</span>
 <span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 3 features and 7 fields</span></span>
 <span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
 <span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; Dimension:     XY</span></span>
@@ -444,8 +441,8 @@ difference.</p>
 <p>In <code>hydroloom</code>, edge-to-edge topology is referred to with
 “id and toid” attributes.</p>
 </div>
-<div id="representing-dendritic-network-topology-1" class="section level2">
-<h2>Representing Dendritic Network Topology</h2>
+<div id="representing-non-dendritic-network-topology" class="section level2">
+<h2>Representing Non-Dendritic Network Topology</h2>
 <p>As discussed in the <code>vignette(&quot;non-dendritic&quot;)</code> vignette,
 a hydrologic flow network can be represented as an edge to edge
 (e.g. edge list) topology or an edge-node topology. In the case of
@@ -472,10 +469,10 @@ node identifiers can be created based on an edge list and discarded when
 no longer needed.</p>
 <div class="row">
 <div class="column">
-<p><img role="img" src="data:image/png;base64,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" width="45%" style="display: block; margin: auto;" /></p>
+<p><img role="img" aria-label src="data:image/png;base64,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" alt width="45%" style="display: block; margin: auto;" /></p>
 </div>
 <div class="column">
-<p><img role="img" src="data:image/png;base64,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" width="45%" style="display: block; margin: auto;" /></p>
+<p><img role="img" aria-label src="data:image/png;base64,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" alt width="45%" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <p>In this example of an edge list topology and a node topology for the
@@ -564,14 +561,10 @@ the following tables.</p>
 <h2>Network Graph Representation</h2>
 <p>The <code>make_index_ids()</code> <code>hydroloom</code> function
 creates an adjacency matrix representation of a flow network as well as
-some convenient content that are useful when traversing the graph. This
+some convenient content that is useful when traversing the graph. This
 adjacency matrix is used heavily in <code>hydroloom</code> functions and
 may be useful to people who want to write their own graph traversal
 algorithms.</p>
-<p>A companion to <code>make_index_ids()</code>,
-<code>make_fromids()</code> reverses the graph such that the adjacency
-matrix is directed opposite the direction of the provided graph. This is
-used for upstream flow network traversals.</p>
 <p>In the example below we’ll add a dendritic toid and explore the
 <code>make_index_ids()</code> output.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(hy_net, <span class="at">return_dendritic =</span> <span class="cn">TRUE</span>)</span>
@@ -605,36 +598,93 @@ now has three rows. This indicates that one or more of the connections
 in the matrix has three downstream neighbors. The <code>lengths</code>
 element indicates how many non <code>NA</code> values are in each column
 of the matrix in the <code>to</code> element.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(<span class="fu">st_drop_geometry</span>(hy_net), <span class="at">return_dendritic =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">max</span>(ind_id<span class="sc">$</span>lengths)</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">3</span>)</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
-<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(<span class="fu">st_drop_geometry</span>(hy_net), <span class="at">return_dendritic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">max</span>(ind_id<span class="sc">$</span>lengths)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">3</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<p>The default <code>mode = &quot;to&quot;</code> produces a downstream-directed
+graph. Setting <code>mode = &quot;from&quot;</code> inverts the direction so that
+each column’s entries point to upstream neighbors instead. The output
+uses <code>froms</code> and <code>froms_list</code> naming to
+distinguish from the downstream version.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>from_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">names</span>(from_id)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;froms&quot;      &quot;lengths&quot;    &quot;froms_list&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">dim</span>(from_id<span class="sc">$</span>froms)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># a confluence: two upstream connections</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">max</span>(from_id<span class="sc">$</span>lengths)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="fu">sum</span>(from_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; [1] 227</span></span></code></pre></div>
+<p>Setting <code>mode = &quot;both&quot;</code> returns a list containing both the
+<code>to</code> and <code>from</code> graphs, which is useful when an
+algorithm needs to traverse the network in both directions without
+creating the graph twice.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>both_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">names</span>(both_id)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;   &quot;from&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># each direction covers the same set of features</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">ncol</span>(both_id<span class="sc">$</span>to<span class="sc">$</span>to) <span class="sc">==</span> <span class="fu">ncol</span>(both_id<span class="sc">$</span>from<span class="sc">$</span>froms)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+</div>
+<div id="using-the-graph-representation" class="section level2">
+<h2>Using the Graph Representation</h2>
+<p>Most <code>hydroloom</code> functions that need a graph create it
+internally from <code>id</code> and <code>toid</code> attributes.
+Functions like <code>sort_network()</code>,
+<code>accumulate_downstream()</code>, <code>add_levelpaths()</code>,
+<code>add_streamorder()</code>, and <code>subset_network()</code> all
+call <code>make_index_ids()</code> behind the scenes so users do not
+need to construct the graph themselves.</p>
+<p>The exception is <code>navigate_network_dfs()</code>, which accepts
+either a data.frame or a pre-built index_ids list. When calling
+<code>navigate_network_dfs()</code> many times (e.g., starting from
+every feature in a network), passing a pre-built graph avoids
+reconstructing it on each call.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># navigate_network_dfs creates the graph internally from a data.frame</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(y, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># or accept pre-built index ids -- use &quot;to&quot; for downstream, &quot;from&quot; for upstream</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>to_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;to&quot;</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(to_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>from_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(from_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;up&quot;</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; list()</span></span></code></pre></div>
 </div>
 </div>
 

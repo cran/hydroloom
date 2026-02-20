@@ -18,13 +18,14 @@ navigate_hydro_network(x, start, mode, distance = NULL)
 \item{start}{character or numeric to match identifier attribute. The
 starting catchment is included.}
 
-\item{mode}{character chosen from c(UM, DM, UT, or DD).
+\item{mode}{character chosen from c(UM, DM, UT, DD) or equivalently
+c(upmain, downmain, up, down).
 
 \enumerate{
-\item UM: upstream mainstem
-\item DM: downstream main
-\item UT: upstream with tributaries
-\item DD: downstream with diversions
+\item UM / upmain: upstream mainstem
+\item DM / downmain: downstream mainstem
+\item UT / up: upstream with tributaries
+\item DD / down: downstream with diversions
 }}
 
 \item{distance}{numeric distance in km to limit navigation. The first
@@ -49,9 +50,9 @@ large river systems. To strictly follow the dendritic network, set the
 \examples{
 
 plot_fun <- function(x, s, n) {
-   plot(sf::st_geometry(x), col = "grey")
-   plot(sf::st_geometry(x[x$id \%in\% n, ]), add = TRUE)
-   plot(sf::st_geometry(x[x$id \%in\% s, ]), col = "red", lwd = 3, add = TRUE)
+  plot(sf::st_geometry(x), col = "grey")
+  plot(sf::st_geometry(x[x$id \%in\% n, ]), add = TRUE)
+  plot(sf::st_geometry(x[x$id \%in\% s, ]), col = "red", lwd = 3, add = TRUE)
 }
 
 x <- hy(sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom")))

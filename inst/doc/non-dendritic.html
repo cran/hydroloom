@@ -351,6 +351,18 @@ network topology representation and attributes that build on a strictly
 dendritic network. This vignette expands those topics by describing
 <code>hydroloom</code> functionality that supports non-dendritic
 networks.</p>
+<p>The term “non-dendritic” refers to any network that does not follow a
+dendritic flow pattern. Typically, this is where one or more flowlines
+divert from a primary flow path. However, non-dendritic can also refer
+to endorheic basins that are nested within an otherwise dendritic basin.
+This article pertains to the former, “non-dendritic networks” which
+contain diverted flowlines.</p>
+<p>The two terms: “diversion” and “divergence” are used in similar
+contexts but have distinct meaning. A <strong>diversion is a diverted
+flowline</strong> (waterbody) where as a <strong>divergence is where the
+network diverges</strong>. “Diversion” is often associated with
+anthropogenic features but a diversion can also be a naturally occurring
+diverted flow.</p>
 </div>
 <div id="non-dendritic-topology-attributes." class="section level1">
 <h1>Non-dendritic topology attributes.</h1>
@@ -405,9 +417,8 @@ processing in the context of diverted paths.</p>
 <li>All features that are part of a diversion that has not yet
 recombined with a main path, will have <code>stream calculator</code>
 set to 0.</li>
-<li>A feature that is just downstream of where a diversion path
-recombines with a main path will have <code>return diversion</code> set
-to 1.</li>
+<li>A feature that is just downstream of where a diversion recombines
+with a main path will have <code>return divergence</code> set to 1.</li>
 </ol>
 </div>
 <div id="bringing-it-all-together" class="section level2">
@@ -417,57 +428,56 @@ attributes and use them in practice.</p>
 <p>We’ll start with the small sample watershed that’s included in
 <code>hydroloom</code> and select only the attributes required to
 recreate the non-dendritic network.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/new_hope.gpkg&quot;</span>, </span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>                             <span class="at">package =</span> <span class="st">&quot;hydroloom&quot;</span>))</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># First we select only an id, a name, and a feature type.</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">select</span>(COMID, GNIS_ID, FTYPE) <span class="sc">|&gt;</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(<span class="dv">5070</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># Now we convert the geometric network to an attribute topology</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># and convert that to a node topology and join our attributes back</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> flow_net <span class="sc">|&gt;</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  <span class="fu">make_attribute_topology</span>(<span class="at">min_distance =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  hydroloom<span class="sc">::</span><span class="fu">make_node_topology</span>(<span class="at">add_div =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>  <span class="fu">left_join</span>(sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>(flow_net), <span class="at">by =</span> <span class="st">&quot;COMID&quot;</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co"># We only have one outlet so it doesn&#39;t matter if it is coastal</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co"># or inland but we have to provide it.</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a>outlets <span class="ot">&lt;-</span> <span class="fu">filter</span>(flow_net, <span class="sc">!</span>tonode <span class="sc">%in%</span> fromnode)</span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co"># We have these feature types. A larger dataset might include </span></span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co"># things like canals which would not be considered  &quot;major&quot;</span></span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="fu">unique</span>(flow_net<span class="sc">$</span>FTYPE)</span>
-<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; [1] &quot;StreamRiver&quot;    &quot;Connector&quot;      &quot;ArtificialPath&quot;</span></span>
-<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co"># now we run the add_divergence, add_toids, and add_streamorder</span></span>
-<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> <span class="fu">add_divergence</span>(flow_net, </span>
-<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>                           <span class="at">coastal_outlet_ids =</span> <span class="fu">c</span>(), </span>
-<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>                           <span class="at">inland_outlet_ids =</span> outlets<span class="sc">$</span>COMID, </span>
-<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>                           <span class="at">name_attr =</span> <span class="st">&quot;GNIS_ID&quot;</span>, </span>
-<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>                           <span class="at">type_attr =</span> <span class="st">&quot;FTYPE&quot;</span>, </span>
-<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>                           <span class="at">major_types =</span> <span class="fu">unique</span>(flow_net<span class="sc">$</span>FTYPE)) <span class="sc">|&gt;</span></span>
-<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>  <span class="fu">add_toids</span>() <span class="sc">|&gt;</span></span>
-<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a>  <span class="fu">add_streamorder</span>() <span class="sc">|&gt;</span></span>
-<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a>  <span class="fu">add_return_divergence</span>()</span>
-<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a><span class="co"># Make sure we reproduce what came from our source NHDPlus data.</span></span>
-<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a><span class="fu">sum</span>(flow_net<span class="sc">$</span>divergence <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
-<span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a><span class="fu">sum</span>(x<span class="sc">$</span>Divergence <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
-<span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a><span class="fu">all</span>(flow_net<span class="sc">$</span>divergence <span class="sc">==</span> x<span class="sc">$</span>Divergence)</span>
-<span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
-<span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a><span class="fu">sum</span>(flow_net<span class="sc">$</span>return_divergence <span class="sc">==</span> x<span class="sc">$</span>RtnDiv)</span>
-<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a><span class="co">#&gt; [1] 745</span></span>
-<span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a></span>
-<span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a><span class="fu">names</span>(flow_net)</span>
-<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;COMID&quot;             &quot;toid&quot;              &quot;tonode&quot;           </span></span>
-<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="co">#&gt;  [4] &quot;GNIS_ID&quot;           &quot;FTYPE&quot;             &quot;divergence&quot;       </span></span>
-<span id="cb1-50"><a href="#cb1-50" tabindex="-1"></a><span class="co">#&gt;  [7] &quot;fromnode&quot;          &quot;stream_order&quot;      &quot;stream_calculator&quot;</span></span>
-<span id="cb1-51"><a href="#cb1-51" tabindex="-1"></a><span class="co">#&gt; [10] &quot;return_divergence&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">read_sf</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata/new_hope.gpkg&quot;</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">package =</span> <span class="st">&quot;hydroloom&quot;</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># First we select only an id, a name, and a feature type.</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">select</span>(COMID, GNIS_ID, FTYPE) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  sf<span class="sc">::</span><span class="fu">st_transform</span>(<span class="dv">5070</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Now we convert the geometric network to an attribute topology</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># and convert that to a node topology and join our attributes back</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> flow_net <span class="sc">|&gt;</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>  <span class="fu">make_attribute_topology</span>(<span class="at">min_distance =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>  hydroloom<span class="sc">::</span><span class="fu">make_node_topology</span>(<span class="at">add_div =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>  <span class="fu">left_join</span>(sf<span class="sc">::</span><span class="fu">st_drop_geometry</span>(flow_net), <span class="at">by =</span> <span class="st">&quot;COMID&quot;</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co"># We only have one outlet so it doesn&#39;t matter if it is coastal</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co"># or inland but we have to provide it.</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a>outlets <span class="ot">&lt;-</span> <span class="fu">filter</span>(flow_net, <span class="sc">!</span>tonode <span class="sc">%in%</span> fromnode)</span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co"># We have these feature types. A larger dataset might include</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co"># things like canals which would not be considered  &quot;major&quot;</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="fu">unique</span>(flow_net<span class="sc">$</span>FTYPE)</span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;StreamRiver&quot;    &quot;Connector&quot;      &quot;ArtificialPath&quot;</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co"># now we run the add_divergence, add_toids, and add_streamorder</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a>flow_net <span class="ot">&lt;-</span> <span class="fu">add_divergence</span>(flow_net,</span>
+<span id="cb1-27"><a href="#cb1-27" tabindex="-1"></a>  <span class="at">coastal_outlet_ids =</span> <span class="fu">c</span>(),</span>
+<span id="cb1-28"><a href="#cb1-28" tabindex="-1"></a>  <span class="at">inland_outlet_ids =</span> outlets<span class="sc">$</span>COMID,</span>
+<span id="cb1-29"><a href="#cb1-29" tabindex="-1"></a>  <span class="at">name_attr =</span> <span class="st">&quot;GNIS_ID&quot;</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" tabindex="-1"></a>  <span class="at">type_attr =</span> <span class="st">&quot;FTYPE&quot;</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" tabindex="-1"></a>  <span class="at">major_types =</span> <span class="fu">unique</span>(flow_net<span class="sc">$</span>FTYPE)) <span class="sc">|&gt;</span></span>
+<span id="cb1-32"><a href="#cb1-32" tabindex="-1"></a>  <span class="fu">add_toids</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-33"><a href="#cb1-33" tabindex="-1"></a>  <span class="fu">add_streamorder</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-34"><a href="#cb1-34" tabindex="-1"></a>  <span class="fu">add_return_divergence</span>()</span>
+<span id="cb1-35"><a href="#cb1-35" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" tabindex="-1"></a><span class="co"># Make sure we reproduce what came from our source NHDPlus data.</span></span>
+<span id="cb1-37"><a href="#cb1-37" tabindex="-1"></a><span class="fu">sum</span>(flow_net<span class="sc">$</span>divergence <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb1-38"><a href="#cb1-38" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
+<span id="cb1-39"><a href="#cb1-39" tabindex="-1"></a><span class="fu">sum</span>(x<span class="sc">$</span>Divergence <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb1-40"><a href="#cb1-40" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
+<span id="cb1-41"><a href="#cb1-41" tabindex="-1"></a><span class="fu">all</span>(flow_net<span class="sc">$</span>divergence <span class="sc">==</span> x<span class="sc">$</span>Divergence)</span>
+<span id="cb1-42"><a href="#cb1-42" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span>
+<span id="cb1-43"><a href="#cb1-43" tabindex="-1"></a><span class="fu">sum</span>(flow_net<span class="sc">$</span>return_divergence <span class="sc">==</span> x<span class="sc">$</span>RtnDiv)</span>
+<span id="cb1-44"><a href="#cb1-44" tabindex="-1"></a><span class="co">#&gt; [1] 745</span></span>
+<span id="cb1-45"><a href="#cb1-45" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" tabindex="-1"></a><span class="fu">names</span>(flow_net)</span>
+<span id="cb1-47"><a href="#cb1-47" tabindex="-1"></a><span class="co">#&gt;  [1] &quot;COMID&quot;             &quot;toid&quot;              &quot;tonode&quot;           </span></span>
+<span id="cb1-48"><a href="#cb1-48" tabindex="-1"></a><span class="co">#&gt;  [4] &quot;GNIS_ID&quot;           &quot;FTYPE&quot;             &quot;divergence&quot;       </span></span>
+<span id="cb1-49"><a href="#cb1-49" tabindex="-1"></a><span class="co">#&gt;  [7] &quot;fromnode&quot;          &quot;stream_order&quot;      &quot;stream_calculator&quot;</span></span>
+<span id="cb1-50"><a href="#cb1-50" tabindex="-1"></a><span class="co">#&gt; [10] &quot;return_divergence&quot;</span></span></code></pre></div>
 <p>With the above code, we removed all attributes other than an ID, a
 name and a feature type and recreated both a dendritic (toid) and
 non-dendritic (fromnode tonode) topology. We added

@@ -12,10 +12,14 @@
 #' implementation detail.
 #'
 #' @export
-#' @inheritParams add_levelpaths
+#' @param x data.frame network compatible with \link{hydroloom_names}.
+#' @details
+#'
+#' Required attributes: `id`, `toid`
+#'
 #' @param split logical if TRUE, the result will be split into
 #' independent networks identified by the id of their outlet. The
-#' outlet id of each independent network is added as a "terminalid"
+#' outlet id of each independent network is added as a "terminal_id"
 #' attribute.
 #' @param outlets same as id in x. if specified, only the network
 #' emanating from these outlets will be considered and returned.
@@ -70,29 +74,27 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
   x <- select(st_drop_geometry(x), id, toid, everything())
 
   # index for fast traversal
-  index_ids <- make_index_ids(x)
+  index_ids <- make_index_ids(x, mode = "both")
 
-  froms <- make_fromids(index_ids)
-
-  if(!is.null(outlets)) {
-    starts <- which(index_ids$to_list$id %in% outlets)
+  if (!is.null(outlets)) {
+    starts <- which(index_ids$to$to_list$id %in% outlets)
   } else {
     # All the start nodes
-    if(any(x$toid != get_outlet_value(x) & !x$toid %in% x$id)) {
+    if (any(x$toid != get_outlet_value(x) & !x$toid %in% x$id)) {
       warning("no outlet found -- will start from outlets that go no where.")
-      starts <- which(index_ids$to_list$id %in% x$id[!x$toid %in% x$id])
+      starts <- which(index_ids$to$to_list$id %in% x$id[!x$toid %in% x$id])
     } else {
-      starts <- which(index_ids$to_list$id %in% x$id[x$toid == get_outlet_value(x)])
+      starts <- which(index_ids$to$to_list$id %in% x$id[x$toid == get_outlet_value(x)])
     }
   }
   # Some vectors to track results
-  to_visit <- out <- rep(0, length(index_ids$to_list$id))
+  to_visit <- out <- rep(0, length(index_ids$to$to_list$id))
 
   # Use to track if a node is ready to be visited.
   # will subtract from this and not visit the upstream until ready element = 1
-  ready <- index_ids$lengths
+  ready <- index_ids$to$lengths
 
-  if(split) {
+  if (split) {
     set <- out
     out_list <- rep(list(list()), length(starts))
   }
@@ -101,7 +103,7 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
   o <- 1
   set_id <- 1
 
-  for(s in starts) {
+  for (s in starts) {
 
     # Set up the starting node
     node <- s
@@ -113,14 +115,14 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
 
     trk <- 1
 
-    while(v > 0) {
+    while (v > 0) {
 
       # track the order that nodes were visited
       out[node] <- o
       # increment to the next node
       o <- o + 1
 
-      if(split) {
+      if (split) {
         set[n] <- node
         n <- n + 1
       }
@@ -128,16 +130,16 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
       # loop over upstream catchments
       # does nothing if froms_l[node] == 0
 
-      for(from in seq_len(froms$lengths[node])) {
+      for (from in seq_len(index_ids$from$lengths[node])) {
 
         # grab the next upstream node
-        next_node <- froms$froms[from, node]
+        next_node <- index_ids$from$froms[from, node]
 
         # check if we have a node to visit
-        # not needed? was in the if below node <= ncol(froms$froms) &&
-        if(!is.na(next_node)) {
+        # not needed? was in the if below node <= ncol(index_ids$from$froms) &&
+        if (!is.na(next_node)) {
 
-          if(ready[next_node] == 1) {
+          if (ready[next_node] == 1) {
             # Add the next node to visit to the tracking vector
             to_visit[v] <- next_node
 
@@ -149,7 +151,8 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
             ready[next_node] <- ready[next_node] - 1
           }
 
-        }}
+        }
+      }
 
       # go to the last element added in to_visit
       v <- v - 1
@@ -157,34 +160,35 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
 
       trk <- trk + 1
 
-      if(trk > length(index_ids$to_list$id) * 2) {
+      if (trk > length(index_ids$to$to_list$id) * 2) {
         stop("runaway while loop, something wrong with the network?")
       }
 
     }
 
-    if(split) {
-      out_list[[set_id]] <- index_ids$to_list$id[set[1:(n - 1)]]
+    if (split) {
+      out_list[[set_id]] <- index_ids$to$to_list$id[set[1:(n - 1)]]
       set_id <- set_id + 1
     }
   }
 
-  if(split) names(out_list) <- index_ids$to_list$id[starts]
+  if (split) names(out_list) <- index_ids$to$to_list$id[starts]
 
   ### rewrites x into the correct order. ###
   id_order <- unique(x$id)[which(out != 0)]
   out <- out[out != 0]
 
-  if(split & o - 1 != length(id_order)) stop("Are two or more outlets within the same network?")
+  if (split && o - 1 != length(id_order)) stop("Are two or more outlets within the same network?")
 
-  if(is.null(outlets) && length(unique(x$id)) != length(out)) warning("some features missed in sort. Are there loops in the network?")
+  if (is.null(outlets) && length(unique(x$id)) != length(out))
+    warning("some features missed in sort. Are there loops in the network?")
 
   x <- filter(x, .data$id %in% id_order) |>
     left_join(tibble(id = id_order, sorter = out), by = "id") |>
     arrange(desc(.data$sorter)) |>
     select(-"sorter")
 
-  if(split) {
+  if (split) {
 
     # this is only two columns
     ids <- as(names(out_list), class(pull(x[1, 1])))
@@ -208,7 +212,13 @@ sort_network.hy <- function(x, split = FALSE, outlets = NULL) {
 #' Add topo_sort
 #' @description calls \link{sort_network} without support for splitting the network
 #' and adds a `nrow:1` topo_sort attribute.
-#' @inheritParams sort_network
+#' @param x data.frame network compatible with \link{hydroloom_names}.
+#' @param outlets same as id in x. if specified, only the network
+#' emanating from these outlets will be considered and returned.
+#' @details
+#'
+#' Required attributes: `id`, `toid`
+#'
 #' @returns data.frame containing a topo_sort attribute.
 #' @name add_topo_sort
 #' @export
@@ -239,8 +249,8 @@ add_topo_sort.hy <- function(x, outlets = NULL) {
   ids <- unique(out$id)
 
   dplyr::left_join(out,
-                   data.frame(id = ids,
-                              topo_sort = seq(from = length(ids), to = 1, by = -1)),
-                   by = "id")
+    data.frame(id = ids,
+      topo_sort = seq(from = length(ids), to = 1, by = -1)),
+    by = "id")
 
 }

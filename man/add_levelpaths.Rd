@@ -61,7 +61,7 @@ If a future plan is set, it will be used for a preprocess step of the function.
 }
 \details{
 The levelpath algorithm defines upstream mainstem paths through a network.
-At a given junction with two or more upstream flowpaths, the main path is
+At a given junction with two or more upstream flowlines, the main path is
 either 1) the path with the same name, 2) the path with any name, 3) or the
 path with the larger weight. If the \code{weight_attribute} is \code{override_factor}
 times larger on a path, it will be followed regardless of the name_attribute
@@ -78,12 +78,12 @@ test_flowline <- add_toids(g)
 
 # use NHDPlus attributes directly
 add_levelpaths(test_flowline,
-               name_attribute = "GNIS_ID",
-               weight_attribute = "ArbolateSu")
+  name_attribute = "GNIS_ID",
+  weight_attribute = "ArbolateSu")
 
 # use hy attributes where they can be mapped
 add_levelpaths(hy(test_flowline),
-               name_attribute = "GNIS_ID",
-               weight_attribute = "arbolate_sum")
+  name_attribute = "GNIS_ID",
+  weight_attribute = "arbolate_sum")
 
 }

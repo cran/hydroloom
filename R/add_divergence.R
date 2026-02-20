@@ -3,7 +3,7 @@ required_atts_add_divergence <- c("id", "fromnode", "tonode")
 #' Add Divergence Attribute
 #' @description Given a non-dendritic flow network and required attributes,
 #' adds a divergence attribute according to NHDPlus data model methods.
-#' @inheritParams add_levelpaths
+#' @param x data.frame network compatible with \link{hydroloom_names}.
 #' @param coastal_outlet_ids vector of identifiers for network outlets that
 #' terminate at the coast.
 #' @param inland_outlet_ids vector of identifiers for network outlets that
@@ -16,6 +16,8 @@ required_atts_add_divergence <- c("id", "fromnode", "tonode")
 #' as being "major". e.g. river might be major and canal might be minor.
 #' @returns returns x with a `divergence` attribute appended
 #' @details
+#'
+#' Required attributes: `id`, `fromnode`, `tonode`
 #'
 #' When considering downstream connections with diversions, there are three
 #' factors considered to determine which is primary.<br>
@@ -57,15 +59,14 @@ required_atts_add_divergence <- c("id", "fromnode", "tonode")
 #' outlets <- g$COMID[!g$ToNode %in% g$FromNode]
 #'
 #' g <- dplyr::select(g, COMID, gnis_id, FTYPE,
-#'                    FromNode, ToNode)
+#'   FromNode, ToNode)
 #'
 #' add_divergence(g,
-#'                coastal_outlet_ids = outlets,
-#'                inland_outlet_ids = c(),
-#'                name_attr = "gnis_id",
-#'                type_attr = "FTYPE",
-#'                major_types = c("StreamRiver", "ArtificialPath", "Connector"))
-#'
+#'   coastal_outlet_ids = outlets,
+#'   inland_outlet_ids = c(),
+#'   name_attr = "gnis_id",
+#'   type_attr = "FTYPE",
+#'   major_types = c("StreamRiver", "ArtificialPath", "Connector"))
 #'
 add_divergence <- function(x, coastal_outlet_ids, inland_outlet_ids,
                            name_attr, type_attr, major_types) {
@@ -80,11 +81,11 @@ add_divergence.data.frame <- function(x, coastal_outlet_ids, inland_outlet_ids,
   x <- hy(x)
 
   x <- add_divergence(x,
-                      coastal_outlet_ids,
-                      inland_outlet_ids,
-                      name_attr,
-                      type_attr ,
-                      major_types)
+    coastal_outlet_ids,
+    inland_outlet_ids,
+    name_attr,
+    type_attr,
+    major_types)
 
   hy_reverse(x)
 }
@@ -104,9 +105,9 @@ add_divergence.hy <- function(x, coastal_outlet_ids, inland_outlet_ids,
 
   check_names(x, required_atts_add_divergence, "add_divergence")
 
-  all_term <- x[!x$tonode %in% x$fromnode,]
+  all_term <- x[!x$tonode %in% x$fromnode, ]
 
-  if(!all(all_term$id %in% c(coastal_outlet_ids, inland_outlet_ids)))
+  if (!all(all_term$id %in% c(coastal_outlet_ids, inland_outlet_ids)))
     stop("All outlets must be included in coastal and inland outlet id parameters")
 
   term <- split(all_term$id, cut(seq_along(all_term$id), 64, labels = FALSE))
@@ -122,17 +123,17 @@ add_divergence.hy <- function(x, coastal_outlet_ids, inland_outlet_ids,
 
   x_save <- x_save[x_save$id %in% x$id, ]
 
-  x <- make_fromids(make_index_ids(x), return_list = TRUE)
+  x <- make_index_ids(x, mode = "from")
 
   paths <- pblapply(term, function(i, net) {
     try(navigate_network_dfs(x = net, starts = i,
-                             direction = "up",
-                             reset = FALSE))
+      direction = "up",
+      reset = FALSE))
   }, net = x, cl = future_available())
 
   paths_df <- data.frame(id = unlist(term),
-                         paths = I(unlist(paths,
-                                          recursive = FALSE))) |>
+    paths = I(unlist(paths,
+      recursive = FALSE))) |>
     mutate(coastal = id %in% coastal_outlet_ids) |>
     unnest(cols = c(paths)) |>
     unnest(cols = c(paths)) |>
@@ -169,8 +170,8 @@ add_divergence.hy <- function(x, coastal_outlet_ids, inland_outlet_ids,
 
   x_save |>
     mutate(divergence = case_when(id %in% div ~ 1,
-                                  id %in% all_div ~ 2,
-                                  TRUE ~ 0))
+      id %in% all_div ~ 2,
+      TRUE ~ 0))
 
 }
 
@@ -181,34 +182,34 @@ winnow_upstream <- function(n, x_orig, major_types, name_count) {
   ups <- filter(x_orig, tonode == n)
   dns <- filter(x_orig, fromnode == n)
 
-  if(nrow(ups) > 1 &
-     any(sum(!is.na(ups$name_att)) == 1)) {
+  if (nrow(ups) > 1 &&
+    any(sum(!is.na(ups$name_att)) == 1)) {
     # use the one that is named.
     ups <- filter(ups, !is.na(.data$name_att))
   }
 
   # if that didn't get us there,
-  if(nrow(ups) > 1 &
-     # if one name matches
-     sum(ups$name_att %in% dns$name_att) == 1) {
+  if (nrow(ups) > 1 &&
+    # if one name matches
+    sum(ups$name_att %in% dns$name_att) == 1) {
     ups <- filter(ups, .data$name_att %in% dns$name_att)
   }
 
   # if one major type and one not
-  if(nrow(ups) > 1 &
-     sum(ups$type_att %in% major_types) == 1) {
+  if (nrow(ups) > 1 &&
+    sum(ups$type_att %in% major_types) == 1) {
     ups <- filter(ups, .data$type_att %in% major_types)
   }
 
   # just pick the one with the smaller name id and log
-  if(nrow(ups) > 1) {
-    if(sum(!is.na(ups$name_att)) > 1) {
+  if (nrow(ups) > 1) {
+    if (sum(!is.na(ups$name_att)) > 1) {
 
       counts <- name_count[names(name_count) %in% ups$name_att]
 
       pick <- names(counts)[which(counts == max(counts))]
 
-      if(length(pick) == 1) {
+      if (length(pick) == 1) {
         ups <- filter(ups, .data$name_att == pick)
 
         cat(paste0("picking ", ups$id, " as main.\n"), file = "divergence_checks.txt", append = TRUE)
@@ -216,7 +217,7 @@ winnow_upstream <- function(n, x_orig, major_types, name_count) {
 
     }
 
-    if(nrow(ups) > 1) {
+    if (nrow(ups) > 1) {
 
       ups <- filter(ups, .data$id == min(.data$id))
 
@@ -225,11 +226,11 @@ winnow_upstream <- function(n, x_orig, major_types, name_count) {
   }
 
   data.frame(id = rep(ups$id, nrow(dns)),
-             name_att = rep(ups$name_att, nrow(dns)),
-             type_att = rep(ups$type_att, nrow(dns)),
-             toid = dns$id,
-             dn_name_att = dns$name_att,
-             dn_type_att = dns$type_att)
+    name_att = rep(ups$name_att, nrow(dns)),
+    type_att = rep(ups$type_att, nrow(dns)),
+    toid = dns$id,
+    dn_name_att = dns$name_att,
+    dn_type_att = dns$type_att)
 
 }
 
@@ -258,80 +259,80 @@ down_level <- function(x) {
   # 420 Underground Conduit
 
   # if we have names on the upstream line we can check 1 and 2
-  if(!is.na(x$name_att[1])) {
+  if (!is.na(x$name_att[1])) {
     pick <- which(x$dn_name_att == x$name_att[1] &
-                    x$major_type & x$coastal)
+      x$major_type & x$coastal)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
     pick <- which(x$dn_name_att == x$name_att[1] &
-                    x$major_type)
+      x$major_type)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
     pick <- which(x$dn_name_att == x$name_att[1])
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
   }
 
   # if any of the downs are named and a major type is in the mix we can check 4
-  if(any(!is.na(x$dn_name_att)) & any(x$major_type) & any(x$coastal)) {
+  if (any(!is.na(x$dn_name_att)) && any(x$major_type) && any(x$coastal)) {
 
     pick <- which(!is.na(x$dn_name_att) & x$major_type & x$coastal)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
   }
 
   # if all downs are unnamed and a major type and coastal are in the mix we can check 5
-  if(all(is.na(x$dn_name_att)) & any(x$major_type) & any(x$coastal)) {
+  if (all(is.na(x$dn_name_att)) && any(x$major_type) && any(x$coastal)) {
 
     pick <- which(x$major_type & x$coastal)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
   }
 
   # if any of the downs are named and one goes coastal we can check 6
-  if(any(!is.na(x$dn_name_att)) & any(x$coastal)) {
+  if (any(!is.na(x$dn_name_att)) && any(x$coastal)) {
 
     pick <- which(!is.na(x$dn_name_att) & x$coastal)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
   }
 
   # if any goes coastal we can check 7
-  if(any(x$coastal)) {
+  if (any(x$coastal)) {
 
     pick <- which(x$coastal)
 
-    if(length(pick)== 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
   }
 
   # if any of the downs are named and none are coastal we can check 8
-  if(any(!is.na(x$dn_name_att)) & !any(x$coastal) & any(x$major_type)) {
+  if (any(!is.na(x$dn_name_att)) && !any(x$coastal) && any(x$major_type)) {
 
     pick <- which(!is.na(x$dn_name_att))
 
-    if(length(pick)== 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
   }
 
   # if any of the downs are major type we can check 9
-  if(any(x$major_type)) {
+  if (any(x$major_type)) {
 
     pick <- which(x$major_type)
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
   }
 
   # if any of the downs are named we can check 10
-  if(any(!is.na(x$dn_name_att)) & !any(x$coastal)) {
+  if (any(!is.na(x$dn_name_att)) && !any(x$coastal)) {
 
     pick <- which(!is.na(x$dn_name_att))
 
-    if(length(pick) == 1) return(x$toid[pick])
+    if (length(pick) == 1) return(x$toid[pick])
 
   }
 
@@ -344,8 +345,11 @@ down_level <- function(x) {
 #' The method implemented matches that of the NHDPlus except
 #' in the rare case that a diversion includes more than one secondary path.
 #'
-#' Requires and `id`, `fromnode`, `tonode` and `divergence` attribute.
 #' See \link{add_divergence} and \link{make_node_topology}.
+#'
+#' @details
+#'
+#' Required attributes: `id`, `fromnode`, `tonode`, `divergence`
 #'
 #' Algorithm:
 #'
@@ -368,7 +372,8 @@ down_level <- function(x) {
 #' the most upstream feature in the set of features downstream of the primary
 #' outlet of the diversion is marked as the return divergence.
 #'
-#' @inheritParams add_levelpaths
+#' @param x data.frame network compatible with \link{hydroloom_names}.
+#' @param status boolean if status updates should be printed.
 #' @returns data.frame containing `return_divergence` attribute
 #' @export
 #' @name add_return_divergence
@@ -431,13 +436,13 @@ add_return_divergence.hy <- function(x, status = TRUE) {
       lapply(x, function(x2) tail(unlist(x2, recursive = TRUE, use.names = FALSE), 1))
     }))
 
-    if(length(out) > 1) {
+    if (length(out) > 1) {
       main <- unlist(paths[1], recursive = TRUE, use.names = FALSE)
 
       out_net <- net |>
         filter(.data$id %in% out & .data$toid %in% main) |>
         left_join(select(net, all_of(c(id, to_topo_sort = topo_sort))),
-                         by = c("toid" = "id")) |>
+          by = c("toid" = "id")) |>
         filter(.data$to_topo_sort == max(.data$to_topo_sort))
 
       out <- unique(out_net$id)

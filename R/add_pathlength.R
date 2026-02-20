@@ -1,9 +1,10 @@
 #' Add Path Length
 #' @description Generates the main path length to a basin's terminal path.
+#' @param x data.frame network compatible with \link{hydroloom_names}.
+#' @details
 #'
-#' Requires id, toid, and length_km hydroloom compatible attributes.
+#' Required attributes: `id`, `toid`, `length_km`
 #'
-#' @inheritParams add_levelpaths
 #' @name add_pathlength
 #' @export
 #' @returns data.frame containing pathlength_km
@@ -41,7 +42,7 @@ add_pathlength.hy <- function(x) {
 
   orig_order <- select(x, id)
 
-  x <- sort_network(st_drop_geometry(x))[nrow(x):1, ]
+  x <- sort_network(st_drop_geometry(x))[rev(seq_len(nrow(x))), ]
 
   pathlength_km <- rep(0, nrow(x))
   length_km <- x$length_km
@@ -49,14 +50,14 @@ add_pathlength.hy <- function(x) {
 
   toids <- match(x$toid, x$id)
 
-  for(i in seq_len(length(toid))) {
+  for (i in seq_along(toid)) {
     tid <- toid[i]
-    if(tid != 0) {
+    if (tid != 0) {
 
       pathlength_km[i] <- length_km[toids[i]] + pathlength_km[toids[i]]
 
     }
-    if(i %% 10000 == 0) message(i)
+    if (i %% 10000 == 0) message(i)
   }
 
   x$pathlength_km <- pathlength_km
