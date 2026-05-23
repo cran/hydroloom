@@ -44,6 +44,25 @@ get_bridge_flowlines.data.frame <- function(x, quiet = FALSE) {
 #' @name get_bridge_flowlines
 #' @export
 get_bridge_flowlines.hy <- function(x, quiet = FALSE) {
+  hy_classify_and_redispatch(x, "get_bridge_flowlines", "hy_topo",
+    hy_guidance_topo, quiet = quiet)
+}
+
+#' @name get_bridge_flowlines
+#' @export
+get_bridge_flowlines.hy_node <- function(x, quiet = FALSE) {
+  hy_node_to_flownetwork(x, "get_bridge_flowlines", quiet = quiet)
+}
+
+#' @name get_bridge_flowlines
+#' @export
+get_bridge_flowlines.hy_flownetwork <- function(x, quiet = FALSE) {
+  get_bridge_flowlines.hy_topo(x, quiet)
+}
+
+#' @name get_bridge_flowlines
+#' @export
+get_bridge_flowlines.hy_topo <- function(x, quiet = FALSE) {
 
   node_topo <- make_nondendritic_topology(x)
 
@@ -55,7 +74,8 @@ get_bridge_flowlines.hy <- function(x, quiet = FALSE) {
 
   result <- format_index_ids_internal(make_adj_dt(node_topo))
 
-  # find_bridges expects 0 sentinels; format_index_ids_internal pads with NA
+  # find_bridges expects 0 as the reserved no-edge marker;
+  # format_index_ids_internal pads with NA
   adj_matrix <- result$to
   adj_matrix[is.na(adj_matrix)] <- 0L
   edge_id_matrix <- result$edge_id

@@ -365,14 +365,29 @@ repository.</a></p>
 </div>
 <div id="hy-s3-class" class="section level1">
 <h1><code>hy</code> S3 class</h1>
-<p>Hydroloom implements an <code>hy</code> S3 class designed to simplify
-integration of <code>hydroloom</code> with existing data and workflows.
-<code>hy()</code> converts a data.frame to an <code>hy</code>
-<code>data.frame</code> with attributes compatible with
+<p>R’s S3 class system attaches a label to a plain object — here, a
+<code>data.frame</code> — so that generic functions like
+<code>print()</code>, <code>add_toids()</code>, or
+<code>sort_network()</code> dispatch to the right method based on that
+label. An S3 object carries its labels as the <code>class()</code>
+vector; calling <code>class(x)</code> shows each label in order from
+most specific to least specific. An S3 subclass is an object whose
+<code>class()</code> vector starts with a more specific label and falls
+back to a more general one, so methods written for the parent still
+apply. In hydroloom, an <code>hy</code> object is a
+<code>data.frame</code> with <code>&quot;hy&quot;</code> added to its class
+vector. The subclasses described below — <code>hy_topo</code>,
+<code>hy_node</code>, <code>hy_flownetwork</code>,
+<code>hy_leveled</code> — are <code>hy</code> objects with one
+additional label that tells hydroloom functions which representation
+pattern the table follows.</p>
+<p>The <code>hy</code> S3 class lets hydroloom work directly with
+existing data. <code>hy()</code> converts a data.frame to an
+<code>hy</code> data.frame with attributes compatible with
 <code>hydroloom</code> functions. <code>hy_reverse()</code> converts a
-<code>hy</code> <code>data.frame</code> back to its original attribute
-names. You can teach <code>hydroloom</code> how to map your attributes
-to <code>hydroloom_name_definitions()</code> with the
+<code>hy</code> data.frame back to its original attribute names. You can
+teach <code>hydroloom</code> how to map your attributes to
+<code>hydroloom_name_definitions()</code> with the
 <code>hydroloom_names()</code> function.</p>
 <p>Most <code>hydroloom</code> functions will work with either a
 <code>hy</code> object or a <code>data.frame</code> containing names
@@ -393,27 +408,60 @@ aiming for consistent, simple, and accurate attribute names.</p>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(COMID, REACHCODE, FromNode, ToNode, Hydroseq, TerminalFl, Divergence)</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">hy</span>(hy_net[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, ])</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 3 features and 7 fields</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; Dimension:     XY</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; Bounding box:  xmin: 1517192 ymin: 1555954 xmax: 1518702 ymax: 1557298</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; Projected CRS: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 8</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt;        id aggregate_id    fromnode    tonode topo_sort terminal_flag divergence</span></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt;     &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;int&gt;      &lt;int&gt;</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 1 8893864 03030002000018 250031721 250031853 250016373             0          0</span></span>
-<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 2 8894490 03030002000018 250031895 250031854 250015665             0          0</span></span>
-<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 3 8894494 03030002000018 250031897 250031895 250015826             0          0</span></span>
-<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: geom &lt;MULTILINESTRING [m]&gt;</span></span>
-<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="fu">attr</span>(<span class="fu">hy</span>(hy_net), <span class="st">&quot;orig_names&quot;</span>)</span>
-<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt;           COMID       REACHCODE        FromNode          ToNode        Hydroseq </span></span>
-<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt;            &quot;id&quot;  &quot;aggregate_id&quot;      &quot;fromnode&quot;        &quot;tonode&quot;     &quot;topo_sort&quot; </span></span>
-<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;      TerminalFl      Divergence            geom </span></span>
-<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; &quot;terminal_flag&quot;    &quot;divergence&quot;          &quot;geom&quot;</span></span></code></pre></div>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; # hydroloom dendritic fromnode/tonode graph: 3 features, 5 nexuses</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; Simple feature collection with 3 features and 7 fields</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; Geometry type: MULTILINESTRING</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; Dimension:     XY</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; Bounding box:  xmin: 1517192 ymin: 1555954 xmax: 1518702 ymax: 1557298</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; Projected CRS: +proj=aea +lat_0=23 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt;        id aggregate_id    fromnode    tonode topo_sort terminal_flag divergence</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt;     &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;         &lt;int&gt;      &lt;int&gt;</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 1 8893864 03030002000018 250031721 250031853 250016373             0          0</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 2 8894490 03030002000018 250031895 250031854 250015665             0          0</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt; 3 8894494 03030002000018 250031897 250031895 250015826             0          0</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: geom &lt;MULTILINESTRING [m]&gt;</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="fu">attr</span>(<span class="fu">hy</span>(hy_net), <span class="st">&quot;orig_names&quot;</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt;           COMID       REACHCODE        FromNode          ToNode        Hydroseq </span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt;            &quot;id&quot;  &quot;aggregate_id&quot;      &quot;fromnode&quot;        &quot;tonode&quot;     &quot;topo_sort&quot; </span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt;      TerminalFl      Divergence            geom </span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; &quot;terminal_flag&quot;    &quot;divergence&quot;          &quot;geom&quot;</span></span></code></pre></div>
 </div>
 <div id="network-representation" class="section level1">
 <h1>Network Representation</h1>
+<p><code>hydroloom</code> represents a hydrologic network using three
+structural patterns, each captured by an S3 subclass of
+<code>hy</code>:</p>
+<ul>
+<li><code>hy_topo</code> – self-referencing edge list with unique
+<code>id</code> and <code>toid</code> (dendritic). Most analytic
+functions (<code>sort_network()</code>, <code>add_levelpaths()</code>,
+<code>add_streamorder()</code>, <code>accumulate_downstream()</code>)
+dispatch on this class. See <code>?hy_topo</code>.</li>
+<li><code>hy_leveled</code> – a <code>hy_topo</code> that additionally
+carries <code>topo_sort</code>, <code>levelpath</code>, and
+<code>levelpath_outlet_id</code>. Required by
+<code>add_pfafstetter()</code>, <code>add_streamlevel()</code>, and
+<code>to_flownetwork()</code>. See <code>?hy_leveled</code>.</li>
+<li><code>hy_node</code> – bipartite (edge-node) graph with unique
+<code>id</code>, <code>fromnode</code>, and <code>tonode</code>.
+Required by <code>add_divergence()</code>,
+<code>add_return_divergence()</code>, and <code>subset_network()</code>.
+See <code>?hy_node</code>.</li>
+<li><code>hy_flownetwork</code> – non-dendritic junction table keyed by
+<code>id</code> and <code>toid</code> (which need not be unique),
+optionally with <code>upmain</code> and <code>downmain</code>. Required
+by <code>navigate_network_dfs()</code> for branching navigation. See
+<code>?hy_flownetwork</code>.</li>
+</ul>
+<p><code>hy()</code> inspects the columns present in a data.frame and
+stamps the appropriate subclass automatically.
+<code>hy_capabilities()</code> reports which hydroloom functions are
+callable on a given object; it is demonstrated at each pipeline stage in
+<code>vignette(&quot;network_navigation&quot;)</code>. The non-dendritic
+divergence case study lives in
+<code>vignette(&quot;non-dendritic&quot;)</code>.</p>
 <div id="representing-dendritic-network-topology" class="section level2">
 <h2>Representing Dendritic Network Topology</h2>
 <p>A network of flowlines can be represented as an edge-to-edge
@@ -426,18 +474,26 @@ to be inferred.</p>
 #&gt;   2    3       N2     N3
 #&gt;   3   NA       N3     N4</code></pre>
 <div class="figure" style="text-align: center">
-<img role="img" aria-label="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." src="data:image/png;base64,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" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." width="45%" /><img role="img" aria-label="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." src="data:image/png;base64,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" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes." width="45%" />
+<img role="img" aria-label="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge topology does not include intervening nodes." src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYAAAAGACAMAAACTGUWNAAAAP1BMVEUAAAAAADoAAGYAOpAAZrY6AAA6AGY6kNtmAABmtv+QOgCQ2/+2ZgC2///bkDrb////tmb/25D//7b//9v///9Zvf0GAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAIHklEQVR4nO3d4XbTRhRFYUGhgQDGIX7/Z20SCE1sWZZGM7PvlfZeq/0BXbZ0vpKQxJaGweBOBiYAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcA3FUAXSp3beerfwIUqNrVma9/CFKgYtdXnvgcoEC1Jkae+iSsQKWmNp78W5ACVZqcePqvoQpUaHrhG18HKLC6GwPf+kJMgZXd2vfmV8IKrOrmvLe/FaHAim6vO+N7QQoUN2PcOd+MU6CwOdvO+m6oAkXNmnbet6MVKGjesjN/HqDA4mYOO/cHMgosbO6us38ipsCiZs86/0eSCixo/qoLfiaswOwWjLrkh/IKzGzJpoteFaHArBZNuuxlKQrMaNmiC18XpMDNFg669IVZCtxo6Z6LXxmnwGSL51z+0kQFJlq+ZsFrQxW4WsGYJS/OVeBKJVsWvTpagdGKpix7eboCI5UtWfj+AAUuKhyy9A0aCpxVumPxO2QUeFfxjOVvUVLgTeUrrniPmAJ/WzHimjfpKfCnNRuuepekAi+tmnDd21QVOK0cYe37hBVYOcHqN2rvXmDtfqvfKb9zgdXzrb9Uwa4F1q9X4VoROxaoMF6Ni3XsVqDGdlWulrJTgSrT1blczS4F6ixX6XpBOxSoNFytCzbtTqDWbtWumLUzgWqz1btk2a4E6q1W8ZpxOxKoOFrNi/btRqDmZlWvmrgTgaqT1b1s5S4E6i5W+bqhOxCoPFjtC7duXqD2XtWvnDv+eA///qj8PC17vH/a5W70t6rPVf/SxWMP+OvLx0QAj/cfvp0Ow6eR36q/VoNrR18+4nEYMgE8fP769O/DyCE3GKvFxbvPH/I43B0zAfzu+PTH4KwWWzW5evrIn4F8AN8vDrnJVG0uX3/xoPkAjhefhdss1ej+ARcfhbIBHC8+BzcaqtUNHM4eNhtAp///GwKcHXAygEOv/VvewuTdA+cCOAxfz36l3UoN7yHz9pFTATx87vX/f1uAt4edCuAwvPT/1wEtN2p6F6WNfGeu6URtb2O1CYG2CzW+j9gGBBoP1PpGbukFWu/T/E56yQWaz9P+VoapBdqv0+FekokFOozT42aeaQV6bNPlbqpJBbpM0+d2tikF+izT6X7CCQU6DdPrhs7pBHrt0u2O2skEus3S75bmqQT6rdLxnvKJBDqO0hEgj0DPTXoCZBHoOklXgBwCfRfpC5BBoPMgnQHiC/TeozdAdIHuc3QHiC3Qf43+AJEFgDEAgLgCxBYEQFQBZAoEIKYAswQDEFEAGgICiCdA7UABRBPAZsAAYglwK3AAkQTAEUCAOALkBiRAFAF0AhQghgC7AAsQQQAeAAbgBejzpwHwAdinDwAAfwgmn/zlAHgA9C+B3FO/HkEAAPDLUOqJ3xxCBADsG2HM074rBgD0rXjiSc8LAoD8MLD/U44UBQB4OULvJxwvDED3F0T1fbqrxQHo/JLMnk82VSCAri8K7/dUN4oE0PFtKb2e6HahALq9Ma7P08wqFkCnt+b2eJK5BQPocnGA9k+xoGgAHS5P0voJlhUOoPkFkto+/OLiATS+RFvLBy8pIEDTi0S2e+jCIgI0vExtqwcuLyRAswtlt3nYVcUEaHSp/hYPuragAC3GCnqiQQHqzxX1PKMC1B4s7GmGBag7WdyzjAtQc7TAJxkYoN5skc8xMkCt4UKfYmiAOtPFPsPYADXGC36CwQHWzxf9/KIDrB0w/OmFB1g3Yfyziw+wZsQEJ5cAoHzGDOeWAaB0yBSnlgKgbMocZ5YDoGTMJCeWBGD5nFnOKwvA0kHTnFYagGWT5jmrPABLRk10UokA5s+a6ZwyAcwdNtUppQJ4nfbKMU//bsySAfwZdxIg2QklA5gaOeP++QB+D3wdIN3ppAN4mfgqQL6zyQfwPPLYQafcPyXAFYErLsFLBjC8fqIdBRje/jdJSgbwesBjR/38a0PS88nVMIztPPqL8Ut50KexPwJpTyTncW8mAeAEgBMATgA4AeAEgBMATgA4AeAEgBMATgA4AeAEgBMALj1A8sMXgE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgBIATAE4AOAHgtgRwGIYP37gjKWtDAIePP07HdALbAfj15e50erz/RB5MQdsBeEmA7r0//IMfgnr39vCPw3CHHUhhmwJ4/hD0z0/oQArbGEC+vwZtDeDh81fmOErbDsDv6Y9PXwykajsAp+9PH/4f77N9Ft4QwOn708kk+wC0LYCUCQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcALACQAnAJwAcKkBhj//ZFbYBEDiU8gN8Ly8AGTDX4O05QZ42n7Ivb8AdMkB0h9/+hPIfvwbOAH6AFaWHiB7AsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsAJACcAnABwAsANBvcfdjJaMGQhAoMAAAAASUVORK5CYII=" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge topology does not include intervening nodes." width="45%" /><img role="img" aria-label="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge topology does not include intervening nodes." src="data:image/png;base64,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" alt="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge topology does not include intervening nodes." width="45%" />
 <p class="caption">
 In an edge-node topology, edges are directed to nodes which are then
-directed to other edges. An edge-to-edge toplogy does not include
+directed to other edges. An edge-to-edge topology does not include
 intervening nodes.
 </p>
 </div>
-<p>The “toid” of a terminal flowline can be either NA or, by convention,
-0 or ““. Using 0 or an empty string is preferred within
-<code>hydroloom</code> but both are handled in most cases. Further, as
-long as 0 is not in the set of IDs, there is little practical
-difference.</p>
+<p>A terminal flowline (outlet) is identified by an explicit rule: a row
+whose <code>toid</code> value is not present in the <code>id</code>
+column. The actual value can be anything — <code>0</code> (the canonical
+numeric default), <code>&quot;&quot;</code> (the canonical character default),
+<code>NA</code>, an arbitrary “no downstream” reserved value from
+another data source, or a unique downstream identifier per outlet.
+<code>hy()</code> replaces <code>NA</code> <code>toid</code> values with
+the canonical reserved value so that user code comparing
+<code>toid</code> to <code>0</code> or <code>&quot;&quot;</code> works as
+expected, but downstream functions detect outlets by the rule
+(<code>!toid %in% id</code>) and do not depend on the canonical value.
+Unique-per-outlet identifiers are preserved through the pipeline, which
+is useful when outlets must remain individually addressable.</p>
 <p>In <code>hydroloom</code>, edge-to-edge topology is referred to with
 “id and toid” attributes.</p>
 </div>
@@ -556,6 +612,46 @@ the following tables.</p>
 </table>
 </div>
 </div>
+<p>The same five-edge network can be stamped as each of the three
+representations by constructing a data.frame with the appropriate
+columns and passing it to <code>hy()</code>. <code>hy()</code> chooses
+the subclass based on which columns are present and whether
+<code>id</code> is unique.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(hydroloom)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># bipartite graph: id + fromnode + tonode (unique id)</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>node_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  <span class="at">id       =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">fromnode =</span> <span class="fu">c</span>(<span class="st">&quot;N1&quot;</span>, <span class="st">&quot;N2&quot;</span>, <span class="st">&quot;N3&quot;</span>, <span class="st">&quot;N2&quot;</span>, <span class="st">&quot;N4&quot;</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  <span class="at">tonode   =</span> <span class="fu">c</span>(<span class="st">&quot;N2&quot;</span>, <span class="st">&quot;N3&quot;</span>, <span class="st">&quot;N4&quot;</span>, <span class="st">&quot;N4&quot;</span>, <span class="st">&quot;N5&quot;</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="fu">class</span>(<span class="fu">hy</span>(node_df))</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; [1] &quot;hy_node&quot;    &quot;hy&quot;         &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># dendritic edge list: id + toid (unique id; secondary path dropped)</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>topo_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>  <span class="at">id   =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>  <span class="at">toid =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>)</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">class</span>(<span class="fu">hy</span>(topo_df))</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; [1] &quot;hy_topo&quot;    &quot;hy&quot;         &quot;tbl_df&quot;     &quot;tbl&quot;        &quot;data.frame&quot;</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co"># non-dendritic junction table: id + toid with id repeating</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>fn_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>  <span class="at">id   =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>),</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>  <span class="at">toid =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">0</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>)</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="fu">class</span>(<span class="fu">hy</span>(fn_df))</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;hy_flownetwork&quot; &quot;tbl_df&quot;         &quot;tbl&quot;            &quot;data.frame&quot;</span></span></code></pre></div>
+<p>The <code>hy_node</code> form preserves both downstream paths from
+feature 1 via <code>fromnode</code>/<code>tonode</code>. The
+<code>hy_topo</code> form is dendritic and keeps only one downstream
+connection per id. The <code>hy_flownetwork</code> form preserves both
+paths by allowing <code>id</code> to repeat. See
+<code>vignette(&quot;non-dendritic&quot;)</code> for a worked case study showing
+how the secondary path is dropped during the <code>hy_node</code> -&gt;
+<code>hy_topo</code> conversion and preserved in
+<code>hy_flownetwork</code>.</p>
 </div>
 <div id="network-graph-representation" class="section level2">
 <h2>Network Graph Representation</h2>
@@ -567,97 +663,97 @@ may be useful to people who want to write their own graph traversal
 algorithms.</p>
 <p>In the example below we’ll add a dendritic toid and explore the
 <code>make_index_ids()</code> output.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(hy_net, <span class="at">return_dendritic =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; [1]   1 746</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">lengths</span>(ind_id<span class="sc">$</span>lengths))</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(hy_net, <span class="at">return_dendritic =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; [1]   1 746</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="fu">max</span>(<span class="fu">lengths</span>(ind_id<span class="sc">$</span>lengths))</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
 <p>Now we’ll look at the same thing but for a non dendritic set of
 toids. Notice that the <code>to</code> element of <code>ind_id</code>
 now has three rows. This indicates that one or more of the connections
 in the matrix has three downstream neighbors. The <code>lengths</code>
 element indicates how many non <code>NA</code> values are in each column
 of the matrix in the <code>to</code> element.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(<span class="fu">st_drop_geometry</span>(hy_net), <span class="at">return_dendritic =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">max</span>(ind_id<span class="sc">$</span>lengths)</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">3</span>)</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
-<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
-<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
-<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
-<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">add_toids</span>(<span class="fu">st_drop_geometry</span>(hy_net), <span class="at">return_dendritic =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>ind_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">names</span>(ind_id)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;      &quot;lengths&quot; &quot;to_list&quot;</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="fu">dim</span>(ind_id<span class="sc">$</span>to)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">max</span>(ind_id<span class="sc">$</span>lengths)</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; [1] 84</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="fu">sum</span>(ind_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">3</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="fu">names</span>(ind_id<span class="sc">$</span>to_list)</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; [1] &quot;id&quot;      &quot;indid&quot;   &quot;toindid&quot;</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="fu">sapply</span>(ind_id, class)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; $to</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; [1] &quot;matrix&quot; &quot;array&quot; </span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; $lengths</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; $to_list</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; [1] &quot;data.frame&quot;</span></span></code></pre></div>
 <p>The default <code>mode = &quot;to&quot;</code> produces a downstream-directed
 graph. Setting <code>mode = &quot;from&quot;</code> inverts the direction so that
 each column’s entries point to upstream neighbors instead. The output
 uses <code>froms</code> and <code>froms_list</code> naming to
 distinguish from the downstream version.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>from_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">names</span>(from_id)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;froms&quot;      &quot;lengths&quot;    &quot;froms_list&quot;</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">dim</span>(from_id<span class="sc">$</span>froms)</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># a confluence: two upstream connections</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="fu">max</span>(from_id<span class="sc">$</span>lengths)</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="fu">sum</span>(from_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; [1] 227</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>from_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">names</span>(from_id)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;froms&quot;      &quot;lengths&quot;    &quot;froms_list&quot;</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="fu">dim</span>(from_id<span class="sc">$</span>froms)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; [1]   3 746</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># a confluence: two upstream connections</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">max</span>(from_id<span class="sc">$</span>lengths)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; [1] 3</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="fu">sum</span>(from_id<span class="sc">$</span>lengths <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; [1] 227</span></span></code></pre></div>
 <p>Setting <code>mode = &quot;both&quot;</code> returns a list containing both the
 <code>to</code> and <code>from</code> graphs, which is useful when an
 algorithm needs to traverse the network in both directions without
 creating the graph twice.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>both_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;both&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">names</span>(both_id)</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;   &quot;from&quot;</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># each direction covers the same set of features</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">ncol</span>(both_id<span class="sc">$</span>to<span class="sc">$</span>to) <span class="sc">==</span> <span class="fu">ncol</span>(both_id<span class="sc">$</span>from<span class="sc">$</span>froms)</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>both_id <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;both&quot;</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">names</span>(both_id)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;to&quot;   &quot;from&quot;</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co"># each direction covers the same set of features</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">ncol</span>(both_id<span class="sc">$</span>to<span class="sc">$</span>to) <span class="sc">==</span> <span class="fu">ncol</span>(both_id<span class="sc">$</span>from<span class="sc">$</span>froms)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
 </div>
 <div id="using-the-graph-representation" class="section level2">
 <h2>Using the Graph Representation</h2>
@@ -673,18 +769,18 @@ either a data.frame or a pre-built index_ids list. When calling
 <code>navigate_network_dfs()</code> many times (e.g., starting from
 every feature in a network), passing a pre-built graph avoids
 reconstructing it on each call.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># navigate_network_dfs creates the graph internally from a data.frame</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(y, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># or accept pre-built index ids -- use &quot;to&quot; for downstream, &quot;from&quot; for upstream</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>to_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;to&quot;</span>)</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(to_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>from_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(from_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;up&quot;</span>)</span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; list()</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># navigate_network_dfs creates the graph internally from a data.frame</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(y, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># or accept pre-built index ids -- use &quot;to&quot; for downstream, &quot;from&quot; for upstream</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>to_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;to&quot;</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(to_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;down&quot;</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>from_index <span class="ot">&lt;-</span> <span class="fu">make_index_ids</span>(y, <span class="at">mode =</span> <span class="st">&quot;from&quot;</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="fu">navigate_network_dfs</span>(from_index, <span class="at">starts =</span> y<span class="sc">$</span>id[<span class="dv">1</span>], <span class="at">direction =</span> <span class="st">&quot;up&quot;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; list()</span></span></code></pre></div>
 </div>
 </div>
 

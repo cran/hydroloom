@@ -1,3 +1,5 @@
+utils::globalVariables(c("fromid", "."))
+
 #' @title Make Node Topology from Edge Topology
 #' @description creates a node topology table from an edge topology
 #' @param x data.frame network compatible with \link{hydroloom_names}.
@@ -18,6 +20,7 @@
 #' emanate from a divergence are assigned value 1, and all other paths
 #' are assigned value 0.
 #'
+#' @seealso [hy_topo], [hy_node], [add_toids()]
 #' @export
 #' @name make_node_topology
 #' @examples
@@ -47,9 +50,13 @@ make_node_topology.data.frame <- function(x, add_div = NULL, add = TRUE) {
 
   x <- hy(x)
 
+  orig_names <- attr(x, "orig_names")
+
   x <- make_node_topology(x, add_div, add)
 
   if (inherits(x, "hy")) {
+    attr(x, "orig_names") <- orig_names
+    if (!inherits(x, "hy")) class(x) <- c("hy", class(x))
     hy_reverse(x)
   } else {
     x
@@ -60,6 +67,19 @@ make_node_topology.data.frame <- function(x, add_div = NULL, add = TRUE) {
 #' @name make_node_topology
 #' @export
 make_node_topology.hy <- function(x, add_div = NULL, add = TRUE) {
+  hy_classify_and_redispatch(x, "make_node_topology", "hy_topo",
+    hy_guidance_topo, add_div = add_div, add = add)
+}
+
+#' @name make_node_topology
+#' @export
+make_node_topology.hy_flownetwork <- function(x, add_div = NULL, add = TRUE) {
+  make_node_topology.hy_topo(x, add_div, add)
+}
+
+#' @name make_node_topology
+#' @export
+make_node_topology.hy_topo <- function(x, add_div = NULL, add = TRUE) {
 
   check_names(x, c(id, toid), "make_node_topology")
 
@@ -86,22 +106,22 @@ make_node_topology.hy <- function(x, add_div = NULL, add = TRUE) {
         x <- sf::st_sf(left_join(x, hy_g, by = id))
       }
 
-      if (inherits(x, "hy")) {
-        orig_names <- attributes(x)$orig_names
-      }
+      orig_names <- attr(x, "orig_names")
 
       x <- x[, c(id, fromnode, tonode,
         names(x)[!names(x) %in% c(id, fromnode, tonode)])]
 
       attr(x, "orig_names") <- orig_names
 
+      x <- classify_hy(x)
+
       return(x)
     }
 
   } else {
 
-    if (any(is.na(x$toid))) stop("NA toids found -- must be 0")
-    if (!all(x$toid[x$toid != get_outlet_value(x)] %in% x$id)) stop("Not all non zero toids are in ids")
+    # NA toid and toid-not-in-id are valid outlet markers under the
+    # is_outlet() rule, so no validation of toid values is needed here.
     if (any(c(fromnode, tonode) %in% names(x))) stop("fromnode or tonode already in data")
 
     x <- sort_network(x)
@@ -114,7 +134,7 @@ make_node_topology.hy <- function(x, add_div = NULL, add = TRUE) {
     x <- left_join(x, select(x, all_of(c(id = id, tonode = fromnode))),
       by = c(toid = id))
 
-    outlets <- x$toid == get_outlet_value(x)
+    outlets <- is_outlet(x)
 
     x$tonode[outlets] <- seq(max(x$tonode, na.rm = TRUE) + 1,
       max(x$tonode, na.rm = TRUE) + sum(outlets))
@@ -153,7 +173,7 @@ make_node_topology.hy <- function(x, add_div = NULL, add = TRUE) {
     x <- x[, c(id, toid, fromnode, tonode,
       names(x)[!names(x) %in% c(id, toid, fromnode, tonode)])]
 
-    x
+    classify_hy(x)
 
   } else {
 
@@ -164,14 +184,47 @@ make_node_topology.hy <- function(x, add_div = NULL, add = TRUE) {
   }
 }
 
+#' @importFrom data.table setorder rbindlist
+#' @noRd
 make_nondendritic_topology <- function(x) {
 
-  # First create a unique node id that groups on sets of downstream ids
+  network_ids <- x$id
+
+  # Create a unique node id that groups on sets of downstream ids. Two
+  # fromids with identical downstream sets legitimately share a graph node
+  # (the divergence or confluence they both resolve to). But fromids whose
+  # downstream set is empty after dropping outlet rows do NOT share a graph
+  # node with each other -- they are independent terminal flowlines, each
+  # with its own pendant endpoint. Giving them a unique per-fromid node_id
+  # prevents the spurious collapse that otherwise creates a single super-hub
+  # node incident to every terminal in the partition. Outlet rows are
+  # identified by membership (toid not present in network_ids) so this
+  # works for any outlet convention, including unique-per-outlet identifiers.
   n <- select(x, all_of(c(fromid = id, toid))) |>
-    filter(!is.na(.data$fromid) & !is.na(.data$toid)) |>
-    group_by(.data$fromid) |>
-    mutate(node_id = paste(sort(toid), collapse = "-")) |>
-    ungroup()
+    filter(!is.na(.data$fromid) & !is.na(.data$toid))
+
+  # Vectorized key construction: a single %in% over the full toid vector and
+  # a single data.table grouped paste, replacing a group_by + mutate that
+  # recomputed `toid %in% network_ids` per group and didn't scale to
+  # multi-million-edge networks. Pre-sorting by (fromid, toid) means the
+  # grouped paste produces sorted-collapsed keys without per-group sort().
+  dt <- as.data.table(n)
+  setorder(dt, fromid, toid)
+  keyed <- dt[toid %in% network_ids,
+    .(node_id = paste(toid, collapse = "-")),
+    by = fromid]
+
+  # Fromids whose only edges are to outlets get a per-fromid "__tl__" key so
+  # they remain independent pendant endpoints (see comment block above).
+  tl_fromids <- setdiff(unique(n$fromid), keyed$fromid)
+  if (length(tl_fromids)) {
+    keyed <- rbindlist(list(
+      keyed,
+      data.table(fromid = tl_fromids,
+        node_id = paste0("__tl__", tl_fromids))))
+  }
+
+  n <- left_join(n, as_tibble(keyed), by = "fromid")
 
   hw <- unique(n$fromid[!n$fromid %in% n$toid])
   tl <- unique(n$toid[!n$toid %in% n$fromid])
@@ -196,11 +249,16 @@ make_nondendritic_topology <- function(x) {
     distinct()
 
   # create a rudimentary node based topology.
+  # The c(x$id, x$toid) anchor pulls outlet pseudo-ids into the join so the
+  # synthetic terminal nodes get joined; the trailing filter drops them.
+  # Filtering by membership in the original network ids (rather than equality
+  # to a reserved value) supports any outlet convention, including
+  # unique-per-outlet identifiers.
   out <- distinct(data.frame(id = c(x$id, x$toid))) |>
     left_join(to, by = id) |>
     left_join(from, by = id) |>
     select(all_of(c(id, fromnode, tonode))) |>
-    filter(!id == get_outlet_value(x))
+    filter(.data$id %in% x$id)
 
   if (inherits(x, "hy")) {
     class(out) <- c("hy", class(out))

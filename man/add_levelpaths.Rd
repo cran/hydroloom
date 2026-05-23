@@ -4,6 +4,9 @@
 \alias{add_levelpaths}
 \alias{add_levelpaths.data.frame}
 \alias{add_levelpaths.hy}
+\alias{add_levelpaths.hy_node}
+\alias{add_levelpaths.hy_flownetwork}
+\alias{add_levelpaths.hy_topo}
 \title{Add Level Paths}
 \usage{
 add_levelpaths(
@@ -23,6 +26,30 @@ add_levelpaths(
 )
 
 \method{add_levelpaths}{hy}(
+  x,
+  name_attribute,
+  weight_attribute,
+  override_factor = NULL,
+  status = FALSE
+)
+
+\method{add_levelpaths}{hy_node}(
+  x,
+  name_attribute,
+  weight_attribute,
+  override_factor = NULL,
+  status = FALSE
+)
+
+\method{add_levelpaths}{hy_flownetwork}(
+  x,
+  name_attribute,
+  weight_attribute,
+  override_factor = NULL,
+  status = FALSE
+)
+
+\method{add_levelpaths}{hy_topo}(
   x,
   name_attribute,
   weight_attribute,
@@ -56,8 +83,6 @@ no nameid is available.
 x must include id, toid, and conditionally divergence attributes.
 If a "topo_sort" (hydrosequence in nhdplus terms) attribute is included,
 it will be used instead of recreation.
-
-If a future plan is set, it will be used for a preprocess step of the function.
 }
 \details{
 The levelpath algorithm defines upstream mainstem paths through a network.
@@ -86,4 +111,7 @@ add_levelpaths(hy(test_flowline),
   name_attribute = "GNIS_ID",
   weight_attribute = "arbolate_sum")
 
+}
+\seealso{
+\link{hy_leveled}, \link{hy_topo}, \code{\link[=add_pfafstetter]{add_pfafstetter()}}, \code{\link[=to_flownetwork]{to_flownetwork()}}
 }

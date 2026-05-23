@@ -2,9 +2,24 @@
 % Please edit documentation in R/to_flownetwork.R
 \name{to_flownetwork}
 \alias{to_flownetwork}
+\alias{to_flownetwork.data.frame}
+\alias{to_flownetwork.hy}
+\alias{to_flownetwork.hy_node}
+\alias{to_flownetwork.hy_topo}
+\alias{to_flownetwork.hy_leveled}
 \title{To Flownetwork}
 \usage{
 to_flownetwork(x, warn_dendritic = TRUE)
+
+\method{to_flownetwork}{data.frame}(x, warn_dendritic = TRUE)
+
+\method{to_flownetwork}{hy}(x, warn_dendritic = TRUE)
+
+\method{to_flownetwork}{hy_node}(x, warn_dendritic = TRUE)
+
+\method{to_flownetwork}{hy_topo}(x, warn_dendritic = TRUE)
+
+\method{to_flownetwork}{hy_leveled}(x, warn_dendritic = TRUE)
 }
 \arguments{
 \item{x}{data.frame network compatible with \link{hydroloom_names}.}
@@ -40,4 +55,7 @@ at a confluence.
 f <- sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom"))
 to_flownetwork(f)
 
+}
+\seealso{
+\link{hy_flownetwork}, \link{hy_leveled}, \link{hy_node}, \code{\link[=add_levelpaths]{add_levelpaths()}}
 }

@@ -32,7 +32,7 @@ print.data.frame(data.frame(id = c(1, 2, 3),
   tonode = c("N3", "N3", "N4")),
 row.names = FALSE)
 
-## ----node, fig.show="hold", out.width="45%", echo=FALSE, eval=TRUE, fig.cap="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge toplogy does not include intervening nodes."----
+## ----node, fig.show="hold", out.width="45%", echo=FALSE, eval=TRUE, fig.cap="In an edge-node topology, edges are directed to nodes which are then directed to other edges. An edge-to-edge topology does not include intervening nodes."----
 x <- c(1, 5, 3, 3)
 y <- c(5, 5, 3, 1)
 
@@ -85,6 +85,31 @@ plot(a, b, col = NA)
 
 make_edges()
 par(oldpar)
+
+## ----class_demo, eval=TRUE----------------------------------------------------
+library(hydroloom)
+
+# bipartite graph: id + fromnode + tonode (unique id)
+node_df <- data.frame(
+  id       = c(1, 2, 3, 4, 5),
+  fromnode = c("N1", "N2", "N3", "N2", "N4"),
+  tonode   = c("N2", "N3", "N4", "N4", "N5")
+)
+class(hy(node_df))
+
+# dendritic edge list: id + toid (unique id; secondary path dropped)
+topo_df <- data.frame(
+  id   = c(1, 2, 3, 4, 5),
+  toid = c(2, 3, 5, 5, 0)
+)
+class(hy(topo_df))
+
+# non-dendritic junction table: id + toid with id repeating
+fn_df <- data.frame(
+  id   = c(1, 1, 2, 3, 4, 5),
+  toid = c(2, 4, 3, 5, 5, 0)
+)
+class(hy(fn_df))
 
 ## -----------------------------------------------------------------------------
 y <- add_toids(hy_net, return_dendritic = TRUE)

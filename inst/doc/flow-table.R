@@ -5,7 +5,7 @@ if (!requireNamespace("nhdplusTools", quietly = TRUE)) local <- FALSE
 if (!requireNamespace("mapview", quietly = TRUE)) local <- FALSE
 
 if (local) {
-  nhdplusTools::nhdplusTools_data_dir(tempdir())
+  nhdplusTools::nhdplusTools_data_dir(file.path(tempdir(), "nhd_cache"))
 }
 
 oldoption <- options(scipen = 9999)
@@ -70,16 +70,13 @@ up <- navigate_network_dfs(flow_table, sub$permanent_identifier, direction = "up
 subdown <- fl[fl$permanent_identifier %in% unique(unlist(down)), ]
 subup <- fl[fl$permanent_identifier %in% unique(unlist(up)), ]
 
-map_image <- "flow-table-fig.jpeg"
-map <- mapview::mapview(list(subup, subdown, point))
-mapview::mapviewOptions(fgb = FALSE)
-mapview::mapshot(map, file = map_image)
-knitr::include_graphics(map_image)
+plot(c(sf::st_geometry(subup), sf::st_geometry(subdown)), col = NA)
+plot(sf::st_geometry(subup), col = "blue", lwd = 1, add = TRUE)
+plot(sf::st_geometry(subdown), col = "red", lwd = 1, add = TRUE)
+plot(sf::st_geometry(point), col = "black", pch = 16, cex = 1.5, add = TRUE)
 
 ## ----teardown, include=FALSE--------------------------------------------------
 options(oldoption)
 
-if (!local) {
-  unlink(nhdplusTools::nhdplusTools_data_dir(), recursive = TRUE)
-}
+unlink(nhdplusTools::nhdplusTools_data_dir(), recursive = TRUE)
 

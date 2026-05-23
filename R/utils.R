@@ -3,12 +3,25 @@ future_available <- function() {
     inherits(future::plan(), "sequential")) NULL else "future"
 }
 
+# Writer-side helper: returns the reserved outlet `toid` value for the table's
+# id type (the canonical hydroloom marker — `0` for numeric ids, `""` for
+# character). Used when a function needs to fill in a value for a row that has
+# no downstream (e.g., add_toids assigning toid to disconnected segments). For
+# outlet *detection*, use is_outlet() instead.
 get_outlet_value <- function(x) {
   if (inherits(x$id, "character")) {
     ""
   } else {
     0
   }
+}
+
+# Detector: TRUE for rows whose toid does not refer to any id in the table.
+# A row whose downstream is not part of the network is, by definition, an
+# outlet. Independent of any reserved-value convention: tolerates 0, "", NA,
+# implicit absence, foreign reserved values, or unique-per-outlet ids.
+is_outlet <- function(x) {
+  !x$toid %in% x$id
 }
 
 get_hyg <- function(x, add, id = "id") {
@@ -25,12 +38,14 @@ get_hyg <- function(x, add, id = "id") {
 put_hyg <- function(x, hy_g) {
   if (!is.null(hy_g)) {
     orig_names <- attr(x, "orig_names")
-    x <- st_sf(left_join(x, hy_g, by = id))
-    attr(x, "orig_names") <- orig_names
+    dendritic_attr <- attr(x, "dendritic")
 
-    if (!inherits(x, "hy")) {
-      class(x) <- c("hy", class(x))
-    }
+    x <- st_sf(left_join(x, hy_g, by = id))
+
+    attr(x, "orig_names") <- orig_names
+    attr(x, "dendritic") <- dendritic_attr
+
+    x <- classify_hy(x)
   }
   x
 }
@@ -187,7 +202,7 @@ fix_flowdir <- function(id, network = NULL, fn_list = NULL) {
     } else {
       f <- network[network$id == id, ]
 
-      if (is.na(f$toid) | f$toid == get_outlet_value(f)) {
+      if (is_outlet(f)) {
 
         check_line <- network[network$toid == f$id, ][1, ]
 
@@ -309,10 +324,11 @@ add_toids_internal <- function(x, var = NULL, keep = FALSE) {
   if (all(c(id, fromnode, tonode, divergence) %in% names(x)) &&
     !toid %in% names(x)) {
 
-    x |>
-      st_drop_geometry()
+    x <- st_drop_geometry(x)
 
     if (!keep) x <- select(x, any_of(c(id, fromnode, tonode, divergence, as.character(var))))
+
+    x <- classify_hy(x)
 
     add_toids(x, return_dendritic = FALSE)
 

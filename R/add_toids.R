@@ -11,6 +11,7 @@
 #' Conditionally: `divergence` (if `return_dendritic = TRUE`)
 #'
 #' @returns hy object with toid attribute
+#' @seealso [hy_node], [hy_topo], [make_node_topology()]
 #' @name add_toids
 #' @export
 #' @examples
@@ -33,6 +34,12 @@ add_toids <- function(x, return_dendritic = TRUE) {
 #' @name add_toids
 #' @export
 add_toids.data.frame <- function(x, return_dendritic = TRUE) {
+
+  if (!return_dendritic)
+    warning("return_dendritic = FALSE is deprecated. ",
+      "Use to_flownetwork() for non-dendritic edge lists.",
+      call. = FALSE)
+
   x <- hy(x)
 
   orig_names <- attr(x, "orig_names")
@@ -48,6 +55,21 @@ add_toids.data.frame <- function(x, return_dendritic = TRUE) {
 #' @name add_toids
 #' @export
 add_toids.hy <- function(x, return_dendritic = TRUE) {
+  hy_classify_and_redispatch(x, "add_toids", "hy_node", hy_guidance_node,
+    return_dendritic = return_dendritic)
+}
+
+#' @name add_toids
+#' @export
+add_toids.hy_topo <- function(x, return_dendritic = TRUE) {
+  stop("This network already has toid (class: ", hy_network_type(x),
+    "). add_toids() converts fromnode/tonode to toid.",
+    call. = FALSE)
+}
+
+#' @name add_toids
+#' @export
+add_toids.hy_node <- function(x, return_dendritic = TRUE) {
 
   if ("toid" %in% names(x)) stop("network already contains a toid attribute")
 
@@ -110,7 +132,7 @@ add_toids.hy <- function(x, return_dendritic = TRUE) {
     x <- rename(x, fromnode = "orig_fromnode")
   }
 
-  x
+  classify_hy(x)
 
 }
 

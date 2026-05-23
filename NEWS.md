@@ -1,3 +1,61 @@
+hydroloom 1.2.0
+==========
+
+This release introduces an S3 class hierarchy (`hy_topo`,
+`hy_leveled`, `hy_node`, `hy_flownetwork`) that lets hydroloom
+validate input at dispatch time and emit guided error messages.
+Existing code that passes `data.frame` or `hy` objects keeps
+working -- the new classes are assigned automatically by `hy()`
+and by producer functions. See `?hy_topo`, `?hy_leveled`,
+`?hy_node`, and `?hy_flownetwork` for representation patterns,
+required columns, and conversion paths;
+`vignette("non-dendritic")` and `vignette("network_navigation")`
+provide end-to-end walkthroughs. Package developers should note
+that returned objects now carry subclass attributes which are
+stripped by standard dplyr operations.
+
+- Outlet detection is explicit (#85): a row is an outlet when its
+  `toid` is not in `id`. Canonical reserved values (`0` / `""`),
+  `NA`, implicit absence, foreign reserved values, and
+  unique-per-outlet ids are all accepted. Calls that previously
+  errored on `NA` or orphan `toid` now succeed; warnings are
+  narrower (`check_hy_outlets()` only on type mismatch,
+  `sort_network()` only on zero outlets).
+- S3 class hierarchy (#73). Producer functions stamp output
+  classes (`add_toids()`, `sort_network()`, `add_levelpaths()`,
+  `make_node_topology()`, `to_flownetwork()`); dispatch is on
+  subclass with guided errors for wrong input. `hy_flownetwork`
+  is a separate junction table -- it does not inherit from `hy`.
+- New exported helpers: `hy_network_type()`, `is_dendritic()`,
+  `hy_capabilities()`. Print methods for `hy_topo`, `hy_node`,
+  `hy_flownetwork`.
+- `hy()` gains `add_topo` to auto-build `toid` from
+  `fromnode`/`tonode`.
+- `add_toids(return_dendritic = FALSE)` is deprecated; use
+  `to_flownetwork()`.
+- `add_levelpaths()` is faster (data.table conversion).
+- New `check_valid()` for sf/sfc geometry repair, including
+  `GEOMETRYCOLLECTION` artifacts from `sf::st_make_valid()`. See
+  `?check_valid`.
+- New `dissolve_polygons()` for unioning catchment or HUC-style
+  polygon coverages, with optional grouping and interior-hole
+  fill. Uses `geos` (added to Suggests) for accelerated unions
+  when installed. See `?dissolve_polygons`.
+- Fix `get_bridge_flowlines()` on networks with independent
+  terminals -- `make_nondendritic_topology()` had collapsed all
+  rows carrying the reserved outlet value into one synthetic
+  node, misclassifying bridges and exhausting memory on
+  continental networks.
+- Fix `make_to_dt()` dendritic branch on tibble input.
+- Welcome new contributor Andrew Psoras.
+- **Deprecation notice:** A future release will require that
+  `hy_topo` objects have unique `id` values (one row per
+  catchment). Non-dendritic connectivity with duplicated ids in a
+  toid-based edge list will need to be represented as
+  `hy_flownetwork` (via `to_flownetwork()`). Developers passing
+  non-dendritic toid tables through hydroloom functions should
+  migrate to `to_flownetwork()` or `make_node_topology()`.
+
 hydroloom 1.1.3
 ==========
 

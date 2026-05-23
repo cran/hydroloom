@@ -38,7 +38,7 @@ names(hy(hy_net, clean = TRUE))
 map_prep <- \(x, tol = 100) {
   sf::st_geometry(x) |> # no attributes
   sf::st_transform(3857) |> # basemap projection
-  sf::st_simplify(dTolerance = tol) # sleaner rendering
+  sf::st_simplify(dTolerance = tol) # cleaner rendering
 }
 
 pc <- list(flowline = list(col = NA)) # to hide flowlines in basemap
@@ -200,6 +200,56 @@ flow_net <- to_flownetwork(base_net)
 nrow(flow_net)
 names(flow_net)
 
+## ----capabilities_walkthrough-------------------------------------------------
+# 1. Raw load -- base hy with geometry only.
+step1 <- hy(dplyr::select(hy_net, id, GNIS_NAME, feature_type))
+class(step1)
+hy_capabilities(step1)
+
+# 2. After make_attribute_topology + make_node_topology -- now hy_node.
+step2 <- dplyr::left_join(
+  make_attribute_topology(step1, min_distance = 10),
+  step1, by = "id"
+) |>
+  sf::st_sf() |>
+  make_node_topology(add_div = TRUE, add = TRUE)
+class(step2)
+hy_capabilities(step2)
+
+# 3. After add_divergence -- still hy_node, now with divergence so
+#    add_return_divergence becomes available.
+step3 <- add_divergence(step2,
+  coastal_outlet_ids = outlet$id,
+  inland_outlet_ids = c(),
+  name_attr = "GNIS_NAME",
+  type_attr = "feature_type",
+  major_types = "StreamRiver")
+class(step3)
+hy_capabilities(step3)
+
+# 4. After add_toids(return_dendritic = TRUE) -- promotes to hy_topo,
+#    unlocking edge-list operations (sort_network, add_levelpaths,
+#    add_streamorder, accumulate_downstream, ...).
+step4 <- add_toids(step3, return_dendritic = TRUE)
+class(step4)
+hy_capabilities(step4)
+
+# 5. After add_levelpaths -- promotes to hy_leveled, unlocking
+#    add_pfafstetter, add_streamlevel, and to_flownetwork.
+step4$length_km <- as.numeric(sf::st_length(step4) / 1000)
+step4$weight    <- accumulate_downstream(step4, "length_km")
+step5 <- add_levelpaths(step4,
+  name_attribute = "GNIS_NAME",
+  weight_attribute = "weight")
+class(step5)
+hy_capabilities(step5)
+
+# 6. After to_flownetwork -- becomes hy_flownetwork; navigate_network_dfs
+#    on upmain/downmain is now supported on this lightweight form.
+step6 <- to_flownetwork(dplyr::select(step5, -toid))
+class(step6)
+hy_capabilities(step6)
+
 ## -----------------------------------------------------------------------------
 flow_net_nhdplus <- to_flownetwork(hy_net) |>
   dplyr::arrange(id, toid)
@@ -268,7 +318,4 @@ plot(map_prep(down), col = "blue", add = TRUE, lwd = 2)
 ## ----teardown, include=FALSE--------------------------------------------------
 options(oldoption)
 par(oldpar)
-if (!eval) {
-  unlink(nhdplusTools::nhdplusTools_data_dir(), recursive = TRUE)
-}
 

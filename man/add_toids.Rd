@@ -4,6 +4,8 @@
 \alias{add_toids}
 \alias{add_toids.data.frame}
 \alias{add_toids.hy}
+\alias{add_toids.hy_topo}
+\alias{add_toids.hy_node}
 \title{Add Downstream IDs}
 \usage{
 add_toids(x, return_dendritic = TRUE)
@@ -11,6 +13,10 @@ add_toids(x, return_dendritic = TRUE)
 \method{add_toids}{data.frame}(x, return_dendritic = TRUE)
 
 \method{add_toids}{hy}(x, return_dendritic = TRUE)
+
+\method{add_toids}{hy_topo}(x, return_dendritic = TRUE)
+
+\method{add_toids}{hy_node}(x, return_dendritic = TRUE)
 }
 \arguments{
 \item{x}{data.frame network compatible with \link{hydroloom_names}.}
@@ -43,4 +49,7 @@ names(x)[1:4]
 
 names(y)[1:4]
 
+}
+\seealso{
+\link{hy_node}, \link{hy_topo}, \code{\link[=make_node_topology]{make_node_topology()}}
 }
