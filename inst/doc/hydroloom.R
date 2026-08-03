@@ -16,14 +16,14 @@ library(sf)
 oldoption <- options(scipen = 9999)
 
 ## -----------------------------------------------------------------------------
-library(hydroloom)
-
-hy_net <- sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom")) |>
-  dplyr::select(COMID, REACHCODE, FromNode, ToNode, Hydroseq, TerminalFl, Divergence)
-
-hy(hy_net[1:3, ])
-
-attr(hy(hy_net), "orig_names")
+# library(hydroloom)
+# 
+# hy_net <- sf::read_sf(system.file("extdata/new_hope.gpkg", package = "hydroloom")) |>
+#   dplyr::select(COMID, REACHCODE, FromNode, ToNode, Hydroseq, TerminalFl, Divergence)
+# 
+# hy(hy_net[1:3, ])
+# 
+# attr(hy(hy_net), "orig_names")
 
 ## ----echo=FALSE, eval=TRUE, fig.dim=c(6, 4)-----------------------------------
 print.data.frame(data.frame(id = c(1, 2, 3),
@@ -112,65 +112,65 @@ fn_df <- data.frame(
 class(hy(fn_df))
 
 ## -----------------------------------------------------------------------------
-y <- add_toids(hy_net, return_dendritic = TRUE)
-
-ind_id <- make_index_ids(y)
-
-names(ind_id)
-
-dim(ind_id$to)
-
-max(lengths(ind_id$lengths))
-
-names(ind_id$to_list)
-
-sapply(ind_id, class)
-
-## -----------------------------------------------------------------------------
-y <- add_toids(st_drop_geometry(hy_net), return_dendritic = FALSE)
-
-ind_id <- make_index_ids(y)
-
-names(ind_id)
-dim(ind_id$to)
-
-max(ind_id$lengths)
-
-sum(ind_id$lengths == 2)
-sum(ind_id$lengths == 3)
-
-names(ind_id$to_list)
-
-sapply(ind_id, class)
+# y <- add_toids(hy_net, return_dendritic = TRUE)
+# 
+# ind_id <- make_index_ids(y)
+# 
+# names(ind_id)
+# 
+# dim(ind_id$to)
+# 
+# max(lengths(ind_id$lengths))
+# 
+# names(ind_id$to_list)
+# 
+# sapply(ind_id, class)
 
 ## -----------------------------------------------------------------------------
-from_id <- make_index_ids(y, mode = "from")
-
-names(from_id)
-
-dim(from_id$froms)
-
-# a confluence: two upstream connections
-max(from_id$lengths)
-
-sum(from_id$lengths == 2)
-
-## -----------------------------------------------------------------------------
-both_id <- make_index_ids(y, mode = "both")
-
-names(both_id)
-
-# each direction covers the same set of features
-ncol(both_id$to$to) == ncol(both_id$from$froms)
+# y <- add_toids(hy(st_drop_geometry(hy_net)), return_dendritic = FALSE)
+# 
+# ind_id <- make_index_ids(y)
+# 
+# names(ind_id)
+# dim(ind_id$to)
+# 
+# max(ind_id$lengths)
+# 
+# sum(ind_id$lengths == 2)
+# sum(ind_id$lengths == 3)
+# 
+# names(ind_id$to_list)
+# 
+# sapply(ind_id, class)
 
 ## -----------------------------------------------------------------------------
-# navigate_network_dfs creates the graph internally from a data.frame
-navigate_network_dfs(y, starts = y$id[1], direction = "down")
+# from_id <- make_index_ids(y, mode = "from")
+# 
+# names(from_id)
+# 
+# dim(from_id$froms)
+# 
+# # a confluence: two upstream connections
+# max(from_id$lengths)
+# 
+# sum(from_id$lengths == 2)
 
-# or accept pre-built index ids -- use "to" for downstream, "from" for upstream
-to_index <- make_index_ids(y, mode = "to")
-navigate_network_dfs(to_index, starts = y$id[1], direction = "down")
+## -----------------------------------------------------------------------------
+# both_id <- make_index_ids(y, mode = "both")
+# 
+# names(both_id)
+# 
+# # each direction covers the same set of features
+# ncol(both_id$to$to) == ncol(both_id$from$froms)
 
-from_index <- make_index_ids(y, mode = "from")
-navigate_network_dfs(from_index, starts = y$id[1], direction = "up")
+## -----------------------------------------------------------------------------
+# # navigate_network_dfs creates the graph internally from a data.frame
+# navigate_network_dfs(y, starts = y$id[1], direction = "down")
+# 
+# # or accept pre-built index ids -- use "to" for downstream, "from" for upstream
+# to_index <- make_index_ids(y, mode = "to")
+# navigate_network_dfs(to_index, starts = y$id[1], direction = "down")
+# 
+# from_index <- make_index_ids(y, mode = "from")
+# navigate_network_dfs(from_index, starts = y$id[1], direction = "up")
 
